@@ -3,8 +3,6 @@ package com.matteo.rosterenhancer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,11 +50,10 @@ fun MainViewController() = ComposeUIViewController {
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = "RosterEnhancer Logo",
-                        tint = Color(0xFFB388FF),
-                        modifier = Modifier.size(48.dp)
+                    Text(
+                        text = "📅",
+                        fontSize = 40.sp,
+                        textAlign = TextAlign.Center
                     )
                 }
             }

@@ -49,5 +49,4 @@ abstract class RosterDatabase : RoomDatabase() {
 }
 
 // In KMP Room 2.7.0, usiamo expect per dire al compilatore che ci sarà un costruttore specifico
-@Suppress("NO_ACTUAL_FOR_EXPECT")
 expect object RosterDatabaseConstructor : RoomDatabaseConstructor<RosterDatabase>

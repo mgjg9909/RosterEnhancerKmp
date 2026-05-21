@@ -124,6 +124,9 @@ android {
 dependencies {
     // I processori di annotazione KSP rimangono nel blocco dependencies classico
     add("kspAndroid", libs.room.compiler)
+    add("kspIosArm64", libs.room.compiler)
+    add("kspIosSimulatorArm64", libs.room.compiler)
+    add("kspIosX64", libs.room.compiler)
     
     implementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.junit)
