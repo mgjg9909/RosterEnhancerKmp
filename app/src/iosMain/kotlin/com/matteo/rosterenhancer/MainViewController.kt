@@ -14,7 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.ComposeUIViewController
 
-fun MainViewController() = ComposeUIViewController {
+fun MainViewController() = ComposeUIViewController(
+    configure = {
+        enforceStrictPlistSanityCheck = false
+    }
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
