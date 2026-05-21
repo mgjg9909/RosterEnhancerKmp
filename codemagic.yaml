@@ -46,27 +46,30 @@ workflows:
           # altrimenti firma con 'Sign to Run Locally'
           security find-identity -v -p codesigning || true
 
-      # 5. Compila e archivia l'IPA
+      # 5. Compila senza firma e crea IPA manualmente
       - name: "Build IPA for Sideload"
         script: |
           cd iosApp
-          xcodebuild \
+
+          # Build senza code signing (Sideloadly/AltStore firmeranno sul PC dell'utente)
+          xcodebuild build \
             -project iosApp.xcodeproj \
             -scheme "$XCODE_SCHEME" \
             -configuration Debug \
+            -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -archivePath build/iosApp.xcarchive \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="-" \
-            DEVELOPMENT_TEAM="" \
-            archive
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CONFIGURATION_BUILD_DIR="$(pwd)/build/app"
 
-          # Esporta l'IPA con metodo ad-hoc (sideloading)
-          xcodebuild \
-            -exportArchive \
-            -archivePath build/iosApp.xcarchive \
-            -exportPath build/output \
-            -exportOptionsPlist ../ExportOptions.plist
+          # Pacchettizza come IPA (formato standard: Payload/App.app zippato)
+          mkdir -p build/output/Payload
+          cp -r build/app/iosApp.app build/output/Payload/
+          cd build/output
+          zip -r RosterEnhancer.ipa Payload/
+          echo "IPA creato con successo!"
+          ls -la
 
     artifacts:
       - iosApp/build/output/*.ipa
