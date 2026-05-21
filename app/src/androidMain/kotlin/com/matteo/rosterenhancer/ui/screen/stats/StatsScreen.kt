@@ -41,7 +41,7 @@ import com.matteo.rosterenhancer.ui.theme.*
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
-import com.matteo.rosterenhancer.ui.theme.DarkText
+
 import com.matteo.rosterenhancer.util.Locale
 import com.matteo.rosterenhancer.util.TextStyle
 import com.matteo.rosterenhancer.domain.model.TopCompanion
