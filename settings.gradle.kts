@@ -9,6 +9,8 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+        // Necessario per il plugin Compose Multiplatform di JetBrains
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
 dependencyResolutionManagement {
