@@ -24,10 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.blur
 import org.koin.compose.viewmodel.koinViewModel
 import com.matteo.rosterenhancer.domain.parser.XlsxParser
+import com.matteo.rosterenhancer.domain.parser.ParseResult
 import com.matteo.rosterenhancer.ui.theme.SuccessGreen
-import java.time.Month
-import java.time.format.TextStyle
-import java.util.Locale
+import com.matteo.rosterenhancer.util.TextStyle
+import com.matteo.rosterenhancer.util.Locale
+import com.matteo.rosterenhancer.util.getDisplayName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -204,13 +205,13 @@ private fun ImportPickerContent(onPickFile: () -> Unit) {
 
 @Composable
 private fun ImportPreviewContent(
-    result: XlsxParser.ParseResult,
+    result: ParseResult,
     fileName: String,
     onConfirm: () -> Unit,
     onCancel: () -> Unit
 ) {
     val monthName = try {
-        Month.of(result.month).getDisplayName(TextStyle.FULL_STANDALONE, Locale.ITALIAN)
+        result.month.getDisplayName(TextStyle.FULL, Locale.ITALIAN)
             .replaceFirstChar { it.uppercase() }
     } catch (_: Exception) { "Mese ${result.month}" }
 
@@ -302,7 +303,7 @@ private fun ImportPreviewContent(
 @Composable
 private fun ImportSuccessContent(state: ImportState.Success) {
     val monthName = try {
-        Month.of(state.month).getDisplayName(TextStyle.FULL_STANDALONE, Locale.ITALIAN)
+        state.month.getDisplayName(TextStyle.FULL, Locale.ITALIAN)
             .replaceFirstChar { it.uppercase() }
     } catch (_: Exception) { "Mese ${state.month}" }
 

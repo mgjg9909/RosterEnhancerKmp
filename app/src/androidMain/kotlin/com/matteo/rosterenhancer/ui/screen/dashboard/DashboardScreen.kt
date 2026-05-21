@@ -60,18 +60,21 @@ import com.matteo.rosterenhancer.ui.theme.SuccessGreen
 import com.matteo.rosterenhancer.ui.theme.*
 import com.matteo.rosterenhancer.util.NotificationScheduler
 import kotlinx.coroutines.delay
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.util.Locale
+import com.matteo.rosterenhancer.util.Duration
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import com.matteo.rosterenhancer.util.DateTimeFormatter
+import com.matteo.rosterenhancer.util.TextStyle
+import com.matteo.rosterenhancer.util.Locale
+import com.matteo.rosterenhancer.util.format
+import com.matteo.rosterenhancer.util.now
+import com.matteo.rosterenhancer.util.plusMinutes
 import androidx.compose.ui.text.style.TextAlign
 import com.matteo.rosterenhancer.domain.model.ShiftNote
 import com.matteo.rosterenhancer.ui.components.ShiftNoteBottomSheet
 import kotlinx.coroutines.launch
-import com.matteo.rosterenhancer.util.toJava
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -235,12 +238,12 @@ fun DashboardScreen(
                 if (shift.shiftType != ShiftType.WORK) return@let true
                 
                 val otMinutes = maxOf(shift.overtimeMinutes, uiState.notesByDate[shift.date]?.extraMinutes ?: 0)
-                val end = shift.endTime?.toJava()?.plusMinutes(otMinutes.toLong()) ?: LocalTime.MAX
-                val runsOvernight = end <= (shift.startTime?.toJava() ?: LocalTime.MIN)
+                val end = shift.endTime?.plusMinutes(otMinutes.toLong()) ?: LocalTime(23, 59, 59)
+                val runsOvernight = end <= (shift.startTime ?: LocalTime(0, 0))
                 if (runsOvernight) {
-                    currentTime.isAfter(end) && currentTime.isBefore(shift.startTime?.toJava()) && currentTime.hour > 12
+                    currentTime > end && currentTime < (shift.startTime ?: LocalTime(0, 0)) && currentTime.hour > 12
                 } else {
-                    currentTime.isAfter(end)
+                    currentTime > end
                 }
             } ?: true
 
@@ -249,7 +252,7 @@ fun DashboardScreen(
             } else {
                 todayShift
             }
-            val isUpcoming = isTodayFinished && displayShift != null && displayShift.date.toJava() != LocalDate.now()
+            val isUpcoming = isTodayFinished && displayShift != null && displayShift.date != LocalDate.now()
 
             if (!uiState.hasRoster && !uiState.isLoading) {
                 NoRosterCard(onImport = onNavigateToImport)
@@ -281,8 +284,8 @@ fun DashboardScreen(
                     Box(modifier = Modifier.weight(1.8f).fillMaxHeight()) {
                         val isActuallyUpcoming = nextWorkShift?.let { 
                             val now = LocalDateTime.now()
-                            val start = LocalDateTime.of(it.date.toJava(), it.startTime?.toJava() ?: LocalTime.MIN)
-                            now.isBefore(start)
+                            val start = LocalDateTime(it.date, it.startTime ?: LocalTime(0, 0))
+                            now < start
                         } ?: true
 
                         TodayShiftCard(
@@ -329,7 +332,7 @@ fun DashboardScreen(
                 )
 
                 uiState.nextRestDate?.let { date ->
-                    NextRestCard(date = date.toJava())
+                    NextRestCard(date = date)
                 }
                 
             }
@@ -344,7 +347,7 @@ fun DashboardScreen(
             colleagues = colleaguesForShift,
             onDismiss = { selectedShiftForNote = null },
             onSave = { text, mins, start, end ->
-                viewModel.saveShiftNote(shift, text, mins, start?.toJava(), end?.toJava())
+                viewModel.saveShiftNote(shift, text, mins, start, end)
                 selectedShiftForNote = null
             }
         )
@@ -437,7 +440,7 @@ private fun TodayShiftCard(
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text(
-                                    shift?.date?.toJava()?.format(DateTimeFormatter.ofPattern("d MMM", Locale.ITALIAN)) ?: "",
+                                    shift?.date?.format(DateTimeFormatter.ofPattern("d MMM", Locale.ITALIAN)) ?: "",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = shiftColor,
                                     fontWeight = FontWeight.Bold
@@ -447,7 +450,7 @@ private fun TodayShiftCard(
                     }
                 }
 
-                if (shift?.shiftType == ShiftType.WORK && shift.startTime?.toJava() != null && shift.endTime?.toJava() != null) {
+                if (shift?.shiftType == ShiftType.WORK && shift.startTime != null && shift.endTime != null) {
                     Text(
                         text = shift.timeRange,
                         style = MaterialTheme.typography.titleLarge,
@@ -526,10 +529,10 @@ private fun ShiftCountdownBox(shift: Shift, isUpcoming: Boolean, note: ShiftNote
 
     val countdownText = remember(currentTime, currentDate) {
         if (isUpcoming) {
-            val shiftDateTime = LocalDateTime.of(shift.date.toJava(), shift.startTime?.toJava())
-            val nowDateTime = LocalDateTime.of(currentDate, currentTime)
-            if (nowDateTime.isAfter(shiftDateTime)) return@remember if (isSmall) "Inizio" else "Inizia a breve"
-            val duration = Duration.between(nowDateTime, shiftDateTime)
+            val shiftDateTime = LocalDateTime(shift.date, shift.startTime ?: LocalTime(0, 0))
+            val nowDateTime = LocalDateTime(currentDate, currentTime)
+            if (nowDateTime > shiftDateTime) return@remember if (isSmall) "Inizio" else "Inizia a breve"
+            val duration = com.matteo.rosterenhancer.util.Duration.between(nowDateTime, shiftDateTime)
             val days = duration.toDays()
             val hours = duration.toHours() % 24
             val minutes = duration.toMinutes() % 60
@@ -543,22 +546,22 @@ private fun ShiftCountdownBox(shift: Shift, isUpcoming: Boolean, note: ShiftNote
                 else "Inizia tra %02dh %02dm %02ds".format(hours, minutes, seconds)
             }
         } else {
-            val start = shift.startTime?.toJava() ?: return@remember null
-            val end = (shift.endTime?.toJava() ?: return@remember null).plusMinutes(otMinutes.toLong())
+            val start = shift.startTime ?: return@remember null
+            val end = (shift.endTime ?: return@remember null).plusMinutes(otMinutes.toLong())
             val runsOvernight = end <= start
-            val isWorking = if (runsOvernight) currentTime.isAfter(start) || currentTime.isBefore(end)
-                            else !currentTime.isBefore(start) && !currentTime.isAfter(end)
-            val isFinished = if (runsOvernight) currentTime.isAfter(end) && currentTime.isBefore(start) && currentTime.hour > 12
-                             else currentTime.isAfter(end)
+            val isWorking = if (runsOvernight) currentTime > start || currentTime < end
+                            else currentTime >= start && currentTime <= end
+            val isFinished = if (runsOvernight) currentTime > end && currentTime < start && currentTime.hour > 12
+                             else currentTime > end
             when {
                 isWorking -> {
-                    val d = if (currentTime.isBefore(end)) Duration.between(currentTime, end)
-                            else Duration.between(currentTime, LocalTime.MAX).plus(Duration.between(LocalTime.MIN, end))
+                    val d = if (currentTime < end) Duration.between(currentTime, end)
+                            else Duration.between(currentTime, LocalTime(23, 59, 59)).plus(Duration.between(LocalTime(0, 0), end))
                     
                     if (isSmall) "%02d:%02d:%02d".format(d.toHours(), d.toMinutes() % 60, (d.toMillis() / 1000) % 60)
                     else "Fine tra %02dh %02dm %02ds".format(d.toHours(), d.toMinutes() % 60, (d.toMillis() / 1000) % 60)
                 }
-                !isFinished && currentTime.isBefore(start) -> {
+                !isFinished && currentTime < start -> {
                     val d = Duration.between(currentTime, start)
                     if (isSmall) "%02d:%02d:%02d".format(d.toHours(), d.toMinutes() % 60, (d.toMillis() / 1000) % 60)
                     else "Inizia tra %02dh %02dm %02ds".format(d.toHours(), d.toMinutes() % 60, (d.toMillis() / 1000) % 60)
@@ -575,12 +578,12 @@ private fun ShiftCountdownBox(shift: Shift, isUpcoming: Boolean, note: ShiftNote
                 .padding(horizontal = if (isSmall) 4.dp else 8.dp, vertical = if (isSmall) 2.dp else 4.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                val start = shift.startTime?.toJava()
-                val end = shift.endTime?.toJava()?.plusMinutes(otMinutes.toLong())
+                val start = shift.startTime
+                val end = shift.endTime?.plusMinutes(otMinutes.toLong())
                 val runsOvernight = end != null && start != null && end <= start
                 val isWorking = if (start != null && end != null) {
-                    if (runsOvernight) currentTime.isAfter(start) || currentTime.isBefore(end)
-                    else !currentTime.isBefore(start) && !currentTime.isAfter(end)
+                    if (runsOvernight) currentTime > start || currentTime < end
+                    else currentTime >= start && currentTime <= end
                 } else false
 
                 if (isWorking) {
@@ -592,7 +595,7 @@ private fun ShiftCountdownBox(shift: Shift, isUpcoming: Boolean, note: ShiftNote
                     )
                     Box(Modifier.size(if (isSmall) 8.dp else 10.dp).clip(CircleShape).background(SuccessGreen.copy(alpha = alpha)))
                     Spacer(Modifier.width(if (isSmall) 6.dp else 10.dp))
-                } else if (isUpcoming || (start != null && currentTime.isBefore(start))) {
+                } else if (isUpcoming || (start != null && currentTime < start)) {
                     Box(Modifier.size(if (isSmall) 8.dp else 10.dp).clip(CircleShape).background(Color(0xFFFFB300)))
                     Spacer(Modifier.width(if (isSmall) 6.dp else 10.dp))
                 }
@@ -698,7 +701,7 @@ private fun UpcomingShiftTimelineItem(
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
-                    text = shift.date.toJava().format(DateTimeFormatter.ofPattern("EEEE d", Locale.ITALIAN))
+                    text = shift.date.format(DateTimeFormatter.ofPattern("EEEE d", Locale.ITALIAN))
                         .replaceFirstChar { it.uppercase() },
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
@@ -867,8 +870,7 @@ private fun CompactMonthMetrics(worked: Int, max: Int) {
 @Composable
 private fun NextRestCard(date: LocalDate) {
     val today = LocalDate.now()
-    val period = today.until(date)
-    val daysUntil = period.days + period.months * 30
+    val daysDiff = date.toEpochDays() - today.toEpochDays()
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
 
     Card(
@@ -901,14 +903,14 @@ private fun NextRestCard(date: LocalDate) {
                     fontWeight = FontWeight.ExtraBold
                 )
             }
-            if (daysUntil <= 7) {
+            if (daysDiff <= 7) {
                 Surface(
                     shape = RoundedCornerShape(10.dp),
                     color = ShiftRest1.copy(alpha = 0.1f),
                     contentColor = ShiftRest1
                 ) {
                     Text(
-                        if (daysUntil == 0) "Oggi!" else "tra $daysUntil gg",
+                        if (daysDiff == 0) "Oggi!" else "tra $daysDiff gg",
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Black
@@ -1015,7 +1017,7 @@ private fun LiveColleaguesWidget(
             } else {
                 items(
                     items = colleagues,
-                    key = { it.employeeId + it.date.toJava().toString() } // Chiave univoca per stabilità
+                    key = { it.employeeId + it.date.toString() } // Chiave univoca per stabilità
                 ) { colleague ->
                     ColleagueLiveCard(
                         colleague = colleague,
@@ -1195,8 +1197,8 @@ private fun UpcomingShiftsSection(
     onShiftClick: (Shift) -> Unit
 ) {
     val today = LocalDate.now()
-    val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
-    val upcoming = shifts.filter { it.date.toJava() > today && it.date.toJava() <= endOfMonth }
+    val endOfMonth = com.matteo.rosterenhancer.util.YearMonth(today.year, today.monthNumber).atEndOfMonth()
+    val upcoming = shifts.filter { it.date > today && it.date <= endOfMonth }
     // Dividiamo i turni in gruppi di 4
     val chunks = upcoming.chunked(4)
     
@@ -1503,8 +1505,8 @@ private fun BentoNavigationGrid(
                         Text("Prossimo Riposo", style = MaterialTheme.typography.labelSmall)
                         Text(
                             text = nextRestDate?.let { 
-                                val formatter = java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM", java.util.Locale.ITALIAN)
-                                it.format(formatter).replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.ITALIAN) else it.toString() }
+                                val formatter = DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.ITALIAN)
+                                it.format(formatter).replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase() else char.toString() }
                             } ?: "Non previsto",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
@@ -1584,7 +1586,7 @@ private fun ShiftBadge(shift: Shift?, color: Color) {
 }
 
 private fun shiftColor(shift: Shift?): Color = when (shift?.shiftType) {
-    ShiftType.WORK -> workShiftColor(shift.startTime?.toJava()?.hour)
+    ShiftType.WORK -> workShiftColor(shift.startTime?.hour)
     ShiftType.REST_1, ShiftType.REST_2 -> ShiftRest1
     ShiftType.DAY_OFF -> ShiftDayOff
     ShiftType.ABSENT -> ShiftAbsent
@@ -1864,8 +1866,8 @@ private fun SharedShiftCard(myShift: Shift, colShift: Shift) {
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     
     // Ottimizzazione: ricordiamo la data formattata per evitare ricalcoli durante lo scroll
-    val dateStr = remember(myShift.date.toJava()) {
-        myShift.date.toJava().format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.ITALIAN))
+    val dateStr = remember(myShift.date) {
+        myShift.date.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.ITALIAN))
             .replaceFirstChar { it.uppercase() }
     }
         
@@ -1925,17 +1927,17 @@ private fun SharedShiftCard(myShift: Shift, colShift: Shift) {
 @Composable
 private fun ShiftProgressTimeline(shift: Shift, isSmall: Boolean = false) {
     val currentTime = LocalTime.now()
-    val startTime = shift.startTime?.toJava() ?: return
+    val startTime = shift.startTime ?: return
     val otMinutes = shift.overtimeMinutes
-    val endTime = shift.endTime?.toJava()?.plusMinutes(otMinutes.toLong()) ?: return
+    val endTime = shift.endTime?.plusMinutes(otMinutes.toLong()) ?: return
     
     // Gestione turni notturni
     val isOngoing = remember(currentTime, startTime, endTime) {
         val now = currentTime
-        if (endTime.isBefore(startTime)) { // Turno a cavallo della mezzanotte
-            now.isAfter(startTime) || now.isBefore(endTime)
+        if (endTime < startTime) { // Turno a cavallo della mezzanotte
+            now > startTime || now < endTime
         } else {
-            now.isAfter(startTime) && now.isBefore(endTime)
+            now > startTime && now < endTime
         }
     }
     
@@ -1947,7 +1949,7 @@ private fun ShiftProgressTimeline(shift: Shift, isSmall: Boolean = false) {
         var currentSec = currentTime.toSecondOfDay().toDouble()
         
         if (endSec < startSec) endSec += 24 * 3600
-        if (currentSec < startSec && currentTime.isBefore(endTime)) currentSec += 24 * 3600
+        if (currentSec < startSec && currentTime < endTime) currentSec += 24 * 3600
         
         ((currentSec - startSec) / (endSec - startSec)).coerceIn(0.0, 1.0).toFloat()
     }

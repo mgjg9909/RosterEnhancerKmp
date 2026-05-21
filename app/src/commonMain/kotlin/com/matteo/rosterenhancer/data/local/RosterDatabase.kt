@@ -50,3 +50,4 @@ abstract class RosterDatabase : RoomDatabase() {
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 expect object RosterDatabaseConstructor : RoomDatabaseConstructor<RosterDatabase>
+

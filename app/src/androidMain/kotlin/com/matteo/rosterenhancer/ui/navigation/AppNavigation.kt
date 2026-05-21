@@ -90,19 +90,19 @@ fun AppNavigation(
                 rootNavController = navController,
                 onNavigateToSettings = { 
                     try { navController.navigate(Screen.Settings.route) } 
-                    catch (e: Exception) { android.util.Log.e("Navigation", "Errore navigazione Settings", e) } 
+                    catch (e: Exception) { println("Navigation Error Settings: $e") } 
                 },
                 onNavigateToImport = { 
                     try { navController.navigate(Screen.Import.route) } 
-                    catch (e: Exception) { android.util.Log.e("Navigation", "Errore navigazione Import", e) } 
+                    catch (e: Exception) { println("Navigation Error Import: $e") } 
                 },
                 onNavigateToRestSwap = { 
                     try { navController.navigate(Screen.Swaps.route) } 
-                    catch (e: Exception) { android.util.Log.e("Navigation", "Errore navigazione Swaps", e) } 
+                    catch (e: Exception) { println("Navigation Error Swaps: $e") } 
                 },
                 onNavigateToStats = { 
                     try { navController.navigate(Screen.Stats.route) } 
-                    catch (e: Exception) { android.util.Log.e("Navigation", "Errore navigazione Stats", e) } 
+                    catch (e: Exception) { println("Navigation Error Stats: $e") } 
                 }
             )
         }

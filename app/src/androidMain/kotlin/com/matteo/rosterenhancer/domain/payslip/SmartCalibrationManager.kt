@@ -178,16 +178,7 @@ class SmartCalibrationManager constructor(
     }
 }
 
-sealed class CalibrationResult {
-    data class Success(
-        val data: ExtractedPayslipData,
-        val delta: Double,
-        val theoreticalNet: Double = 0.0,
-        val message: String? = null,
-        val geminiFailReason: String? = null  // non-null solo se Gemini ha fallito
-    ) : CalibrationResult()
-    data class Error(val message: String) : CalibrationResult()
-}
+
 
 
 

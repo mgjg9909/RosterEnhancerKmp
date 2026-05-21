@@ -9,3 +9,4 @@ data class EmployeeEntity(
     val fullName: String,
     val isSelf: Boolean = false
 )
+

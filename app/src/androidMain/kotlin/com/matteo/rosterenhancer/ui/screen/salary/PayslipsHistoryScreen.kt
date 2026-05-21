@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
 import com.matteo.rosterenhancer.data.local.entity.LearningLogEntity
 import com.matteo.rosterenhancer.data.local.entity.PayslipEntity
-import java.time.format.DateTimeFormatter
+import com.matteo.rosterenhancer.util.DateTimeFormatter
 import com.matteo.rosterenhancer.util.getMonthName
 
 @OptIn(ExperimentalMaterial3Api::class)

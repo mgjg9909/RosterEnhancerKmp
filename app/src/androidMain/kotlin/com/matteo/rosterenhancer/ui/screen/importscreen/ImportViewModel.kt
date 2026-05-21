@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.matteo.rosterenhancer.data.repository.RosterRepository
 import com.matteo.rosterenhancer.domain.parser.XlsxParser
+import com.matteo.rosterenhancer.domain.parser.ParseResult
 import com.matteo.rosterenhancer.util.DataStoreManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 sealed class ImportState {
     object Idle : ImportState()
     object Loading : ImportState()
-    data class Preview(val result: XlsxParser.ParseResult, val fileName: String) : ImportState()
+    data class Preview(val result: ParseResult, val fileName: String) : ImportState()
     data class Success(val month: Int, val year: Int, val shiftCount: Int) : ImportState()
     data class Error(val message: String) : ImportState()
 }

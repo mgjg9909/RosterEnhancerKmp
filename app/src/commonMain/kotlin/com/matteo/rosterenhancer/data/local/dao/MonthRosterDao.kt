@@ -28,3 +28,4 @@ interface MonthRosterDao {
     @Query("SELECT COUNT(*) FROM month_rosters")
     suspend fun count(): Int
 }
+

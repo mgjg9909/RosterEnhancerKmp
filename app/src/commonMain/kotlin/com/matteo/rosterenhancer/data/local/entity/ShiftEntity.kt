@@ -44,3 +44,4 @@ data class ShiftEntity(
     val notes: String = ""
 )
 
+

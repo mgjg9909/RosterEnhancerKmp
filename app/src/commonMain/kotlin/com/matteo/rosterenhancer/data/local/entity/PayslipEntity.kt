@@ -36,3 +36,4 @@ data class LearningLogEntity(
     val oldValue: String? = null,
     val newValue: String? = null
 )
+

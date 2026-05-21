@@ -23,8 +23,9 @@ import org.jsoup.Jsoup
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
-import java.time.format.DateTimeFormatter
+import com.matteo.rosterenhancer.util.format
 
+import com.matteo.rosterenhancer.data.network.IRosterScraper
 import javax.inject.Singleton
 
 @Singleton
@@ -32,12 +33,12 @@ class RosterScraper constructor(
     private val client: HttpClient,
     private val employeeDao: EmployeeDao,
     private val xlsxParser: XlsxParser
-) {
+) : IRosterScraper {
     // Aggiornamento URL dopo refactor del portale (Versione 3.2.0.3)
     private val baseUrl = "https://turni.bologna-airport.it/RosterEnhancer"
     private val TAG = "RosterScraper"
 
-    suspend fun login(user: String, pass: String): Result<String> = runCatching {
+    override suspend fun login(user: String, pass: String): Result<String> = runCatching {
         Log.d(TAG, "Inizializzazione sessione (warm-up)...")
         client.get("${baseUrl}accessService") {
             header(HttpHeaders.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
@@ -84,7 +85,7 @@ class RosterScraper constructor(
         }
     }
 
-    suspend fun fetchMyRoster(): Result<List<Shift>> = runCatching {
+    override suspend fun fetchMyRoster(): Result<List<Shift>> = runCatching {
         Log.d(TAG, "Richiesta utente.jsp (AJAX)...")
         val response = client.get("$baseUrl/utente.jsp") {
             header(HttpHeaders.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
@@ -121,10 +122,10 @@ class RosterScraper constructor(
         shifts
     }
 
-    suspend fun fetchGroupRoster(): Result<List<Shift>> = runCatching {
+    override suspend fun fetchGroupRoster(): Result<List<Shift>> = runCatching {
         val allShifts = mutableListOf<Shift>()
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-        val referenceDateStr = today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        val referenceDateStr = today.format(com.matteo.rosterenhancer.util.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
         // --- Sonda iniziale: leggo recordCountGiorni dall'HTML del server ---
         // Uso una richiesta leggera (1 dipendente) per scoprire quanti giorni ha il server.
@@ -362,7 +363,7 @@ class RosterScraper constructor(
                             rawCode = rawCodeWithRole,
                             employeeId = "group_$rawId",
                             employeeName = extractedName.uppercase(),
-                            date = date.toJava(),
+                            date = date,
                             monthRosterId = 0
                         )
                         shifts.add(shift)
@@ -512,7 +513,7 @@ class RosterScraper constructor(
                             rawCode = rawCode,
                             employeeId = realMatricola, 
                             employeeName = realName,
-                            date = date.toJava(),
+                            date = date,
                             monthRosterId = 0
                         ).copy(role = role, notes = note)
                         

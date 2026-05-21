@@ -7,12 +7,16 @@ import com.matteo.rosterenhancer.domain.model.ShiftType
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.InputStream
-import java.time.LocalDate
-import java.time.LocalTime
-import com.matteo.rosterenhancer.util.*
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import com.matteo.rosterenhancer.util.now
+import com.matteo.rosterenhancer.util.monthValue
+import com.matteo.rosterenhancer.util.plusHours
+import com.matteo.rosterenhancer.util.plusDays
+import com.matteo.rosterenhancer.domain.parser.ParseResult
 
 private const val TAG = "XlsxParser"
 
@@ -27,15 +31,6 @@ private const val TAG = "XlsxParser"
  */
 @Singleton
 class XlsxParser @Inject constructor() {
-
-    data class ParseResult(
-        val employees: List<Employee>,
-        val shifts: List<Shift>,
-        val month: Int,
-        val year: Int,
-        val fileName: String = "",
-        val debugInfo: String = ""
-    )
 
     fun parse(inputStream: InputStream, monthRosterId: Long = 0): ParseResult {
         // Leggi tutto il file ZIP in memoria
@@ -266,7 +261,7 @@ class XlsxParser @Inject constructor() {
                         }
                         
                         try {
-                            newDates[colIdx] = LocalDate.of(currentYear, currentMonth, intVal)
+                            newDates[colIdx] = LocalDate(currentYear, currentMonth, intVal)
                             sheetLastDay = intVal
                         } catch (_: Exception) {}
                     }
@@ -486,7 +481,7 @@ class XlsxParser @Inject constructor() {
 
         if (shiftType != ShiftType.WORK) {
             return Shift(
-                employeeId = employeeId, employeeName = nameNorm, date = date.toKotlin(),
+                employeeId = employeeId, employeeName = nameNorm, date = date,
                 shiftType = shiftType, rawCode = rawCode, monthRosterId = monthRosterId
             )
         }
@@ -516,21 +511,21 @@ class XlsxParser @Inject constructor() {
                 else -> Triple(0, 0, 0)
             }
 
-            val startTime = LocalTime.of(hour.coerceIn(0, 23), minute)
+            val startTime = LocalTime(hour.coerceIn(0, 23), minute)
             val endTime   = startTime.plusHours(duration.toLong())
 
             Log.d(TAG, "DEBUG PARSER: Code=$code -> TimeCode=$timeCode -> H=$hour, M=$minute, Dur=$duration -> Range: $startTime-$endTime")
 
             Shift(
-                employeeId = employeeId, employeeName = nameNorm, date = date.toKotlin(),
-                startTime = startTime.toKotlin(), durationHours = duration, endTime = endTime.toKotlin(),
+                employeeId = employeeId, employeeName = nameNorm, date = date,
+                startTime = startTime, durationHours = duration, endTime = endTime,
                 role = role, shiftType = ShiftType.WORK, rawCode = rawCode,
                 monthRosterId = monthRosterId
             )
         } catch (e: Exception) {
             Log.w(TAG, "DEBUG PARSER ERROR: Failed to parse code $code: ${e.message}")
             Shift(
-                employeeId = employeeId, employeeName = nameNorm, date = date.toKotlin(),
+                employeeId = employeeId, employeeName = nameNorm, date = date,
                 shiftType = ShiftType.OTHER, rawCode = rawCode, monthRosterId = monthRosterId
             )
         }
@@ -552,7 +547,7 @@ class XlsxParser @Inject constructor() {
      * Base: 30 dicembre 1899 (compatibilità con il bug di Lotus 1-2-3).
      */
     private fun excelSerialToDate(serial: Int): LocalDate? = try {
-        LocalDate.of(1899, 12, 30).plusDays(serial.toLong())
+        LocalDate(1899, 12, 30).plusDays(serial.toLong())
             .takeIf { it.year in 2000..2100 }
     } catch (_: Exception) { null }
 }

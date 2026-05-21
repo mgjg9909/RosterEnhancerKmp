@@ -10,8 +10,7 @@ import java.util.concurrent.TimeUnit
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
-import org.koin.core.context.startKoin
-import com.matteo.rosterenhancer.di.appModule
+import com.matteo.rosterenhancer.di.initKoin
 import com.matteo.rosterenhancer.di.viewModelModule
 import com.matteo.rosterenhancer.di.workerModule
 
@@ -23,11 +22,11 @@ class RosterApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         // Inizializza Koin per la Dependency Injection
-        startKoin {
+        initKoin {
             androidLogger()
             androidContext(this@RosterApplication)
             workManagerFactory()
-            modules(appModule, viewModelModule, workerModule)
+            modules(viewModelModule, workerModule)
         }
         // ⚠️ Prima di qualsiasi altra cosa, installa il crash logger per catturare i crash futuri
         CrashLogger.install(this)

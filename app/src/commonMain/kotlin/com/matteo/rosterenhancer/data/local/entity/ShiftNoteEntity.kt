@@ -19,3 +19,4 @@ data class ShiftNoteEntity(
     val extraMinutes: Int = 0  // Minuti di prolungamento del turno (es. 30 = +0:30h)
 )
 
+

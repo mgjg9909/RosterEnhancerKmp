@@ -27,3 +27,4 @@ interface ShiftNoteDao {
     suspend fun delete(name: String, date: LocalDate)
 }
 
+

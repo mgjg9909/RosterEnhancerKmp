@@ -37,3 +37,4 @@ interface EmployeeDao {
     @Query("DELETE FROM employees WHERE fullName IN (:names)")
     suspend fun deleteByNames(names: List<String>)
 }
+

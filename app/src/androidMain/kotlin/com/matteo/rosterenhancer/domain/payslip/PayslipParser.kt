@@ -6,15 +6,7 @@ import java.util.regex.Pattern
 
 import javax.inject.Singleton
 
-enum class ReadMethod { GEMINI, LOCAL_OCR }
 
-data class ExtractedPayslipData(
-    val month: Int?,
-    val year: Int?,
-    val netPay: Double?,
-    val grossPay: Double? = null,
-    val readMethod: ReadMethod = ReadMethod.LOCAL_OCR
-)
 
 @Singleton
 class PayslipParser constructor() {
