@@ -9,7 +9,7 @@ workflows:
         BUNDLE_ID: "com.matteo.rosterenhancer"
         XCODE_SCHEME: "iosApp"
         XCODE_WORKSPACE: "iosApp/iosApp.xcodeproj"
-      xcode: latest
+      xcode: "16"
       java: 17
 
     triggering:
