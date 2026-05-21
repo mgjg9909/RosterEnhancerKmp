@@ -24,7 +24,6 @@ workflows:
       - name: "Build KMP Framework (iOS ARM64)"
         script: |
           chmod +x gradlew
-          ./gradlew :app:assembleReleaseXCFramework || \
           ./gradlew :app:linkDebugFrameworkIosArm64
 
       # 2. Installa XcodeGen se non presente
