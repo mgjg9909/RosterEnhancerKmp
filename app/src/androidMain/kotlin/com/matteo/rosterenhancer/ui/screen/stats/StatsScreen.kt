@@ -41,8 +41,12 @@ import com.matteo.rosterenhancer.ui.theme.*
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
-import com.matteo.rosterenhancer.util.TextStyle
+import com.matteo.rosterenhancer.ui.theme.DarkText
 import com.matteo.rosterenhancer.util.Locale
+import com.matteo.rosterenhancer.util.TextStyle
+import com.matteo.rosterenhancer.domain.model.TopCompanion
+import com.matteo.rosterenhancer.domain.model.SalaryTrendPoint
+import com.matteo.rosterenhancer.domain.model.StatsUiState
 
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
