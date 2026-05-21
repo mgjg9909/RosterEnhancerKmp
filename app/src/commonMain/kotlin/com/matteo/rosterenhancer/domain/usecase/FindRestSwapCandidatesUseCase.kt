@@ -8,7 +8,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.daysUntil
 import com.matteo.rosterenhancer.util.*
-import javax.inject.Inject
 
 data class RestSwapCandidate(
     val employeeId: String,
@@ -19,7 +18,7 @@ data class RestSwapCandidate(
     val disqualificationReason: String? = null
 )
 
-class FindRestSwapCandidatesUseCase @Inject constructor(
+class FindRestSwapCandidatesUseCase(
     private val repository: RosterRepository
 ) {
     /**

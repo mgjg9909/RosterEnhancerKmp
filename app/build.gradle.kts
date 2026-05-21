@@ -35,6 +35,7 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
+            implementation(compose.materialIconsExtended)
 
             implementation(libs.datastore.preferences)
             implementation(libs.ktor.client.core)

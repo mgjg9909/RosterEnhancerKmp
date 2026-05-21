@@ -4,9 +4,9 @@ import com.matteo.rosterenhancer.data.repository.RosterRepository
 import com.matteo.rosterenhancer.domain.model.Shift
 import com.matteo.rosterenhancer.domain.model.ShiftType
 import com.matteo.rosterenhancer.util.RoleGroups
-import com.matteo.rosterenhancer.ui.screen.stats.StatsUiState
-import com.matteo.rosterenhancer.ui.screen.stats.TopCompanion
-import com.matteo.rosterenhancer.ui.screen.stats.SalaryTrendPoint
+import com.matteo.rosterenhancer.domain.model.StatsUiState
+import com.matteo.rosterenhancer.domain.model.TopCompanion
+import com.matteo.rosterenhancer.domain.model.SalaryTrendPoint
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -16,9 +16,8 @@ import com.matteo.rosterenhancer.util.*
 
 import com.matteo.rosterenhancer.util.TextStyle
 import com.matteo.rosterenhancer.util.Locale
-import javax.inject.Inject
 
-class GetMonthlyStatsUseCase @Inject constructor(
+class GetMonthlyStatsUseCase(
     private val repository: RosterRepository
 ) {
     fun execute(

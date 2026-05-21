@@ -203,7 +203,7 @@ class RosterRepository(
 
         // 2. Scarica turni personali (obbligatorio — lancia eccezione se fallisce)
         val myShifts = scraper.fetchMyRoster().getOrElse { err ->
-            throw Exception("Impossibile scaricare i turni personali: ${err.localizedMessage}")
+            throw Exception("Impossibile scaricare i turni personali: ${err.message}")
         }
 
         // 3. Scarica turni gruppo (opzionale — usa lista vuota se fallisce)
