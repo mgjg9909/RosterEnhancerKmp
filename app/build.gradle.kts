@@ -81,7 +81,7 @@ kotlin {
             implementation(libs.androidx.core.splashscreen)
         }
         iosMain.dependencies {
-            // Le dipendenze specifiche per iOS andranno qui
+            implementation(libs.ktor.client.darwin)
         }
     }
 }

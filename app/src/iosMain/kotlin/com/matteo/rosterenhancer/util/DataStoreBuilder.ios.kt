@@ -20,6 +20,6 @@ actual fun createDataStore(context: Any?): DataStore<Preferences> {
     )
     val path = requireNotNull(documentDirectory?.path) + "/roster_prefs.preferences_pb"
     return PreferenceDataStoreFactory.createWithPath(
-        producePath = { path.toPath() }
+        produceFile = { path.toPath() }
     )
 }

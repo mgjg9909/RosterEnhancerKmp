@@ -20,8 +20,7 @@ actual val platformModule: Module = module {
     single {
         val dbFilePath = NSHomeDirectory() + "/roster_database.db"
         Room.databaseBuilder<RosterDatabase>(
-            name = dbFilePath,
-            factory = { RosterDatabase::class.instantiateImpl() }
+            name = dbFilePath
         )
         .setDriver(BundledSQLiteDriver())
         .fallbackToDestructiveMigration(true)
@@ -37,11 +36,6 @@ actual val platformModule: Module = module {
             install(HttpCookies) {
                 storage = AcceptAllCookiesStorage()
             }
-            engine {
-                configureRequest {
-                    setAllowsCellularAccess(true)
-                }
-            }
         }
     }
     
@@ -56,9 +50,9 @@ actual val platformModule: Module = module {
     
     single<CredentialsManager> {
         object : CredentialsManager {
-            override fun saveCredentials(user: String, pass: String) {}
+            override suspend fun saveCredentials(username: String, password: String) {}
             override fun getCredentials(): Pair<String, String>? = null
-            override fun clearCredentials() {}
+            override suspend fun clearCredentials() {}
         }
     }
 }
