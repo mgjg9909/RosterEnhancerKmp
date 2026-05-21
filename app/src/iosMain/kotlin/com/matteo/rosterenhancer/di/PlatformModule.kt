@@ -5,7 +5,6 @@ import org.koin.dsl.module
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.room.Room
 import com.matteo.rosterenhancer.data.local.RosterDatabase
-import com.matteo.rosterenhancer.data.local.instantiateImpl
 import com.matteo.rosterenhancer.util.createDataStore
 import platform.Foundation.NSHomeDirectory
 import io.ktor.client.HttpClient
@@ -51,7 +50,9 @@ actual val platformModule: Module = module {
     single<CredentialsManager> {
         object : CredentialsManager {
             override suspend fun saveCredentials(username: String, password: String) {}
-            override fun getCredentials(): Pair<String, String>? = null
+            override suspend fun getUsername(): String? = null
+            override suspend fun getPassword(): String? = null
+            override suspend fun hasCredentials(): Boolean = false
             override suspend fun clearCredentials() {}
         }
     }
