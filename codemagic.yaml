@@ -23,6 +23,7 @@ workflows:
       # 1. Compila il framework Kotlin Multiplatform per iOS ARM64
       - name: "Build KMP Framework (iOS ARM64)"
         script: |
+          chmod +x gradlew
           ./gradlew :app:assembleReleaseXCFramework || \
           ./gradlew :app:linkDebugFrameworkIosArm64
 
