@@ -28,10 +28,9 @@ targets:
           - "$(PROJECT_DIR)/../app/build/bin/iosArm64/debugFramework"
           - "$(PROJECT_DIR)/../app/build/bin/iosSimulatorArm64/debugFramework"
     dependencies:
-      - framework:
-          path: ../app/build/bin/iosArm64/debugFramework/ComposeApp.framework
-          embed: true
-          codeSign: true
+      - framework: ../app/build/bin/iosArm64/debugFramework/ComposeApp.framework
+        embed: true
+        codeSign: true
     info:
       path: iosApp/Info.plist
 
