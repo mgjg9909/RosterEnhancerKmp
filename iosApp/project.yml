@@ -1,0 +1,46 @@
+name: iosApp
+options:
+  bundleIdPrefix: com.matteo.rosterenhancer
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15"
+
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - iosApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.matteo.rosterenhancer
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.9"
+        CODE_SIGN_STYLE: Manual
+        # Sideloading: firma con il certificato personale free
+        CODE_SIGN_IDENTITY: "iPhone Developer"
+        DEVELOPMENT_TEAM: ""
+        # Il framework KMP viene generato da Gradle e copiato qui
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(inherited)"
+          - "$(PROJECT_DIR)/../app/build/bin/iosArm64/debugFramework"
+          - "$(PROJECT_DIR)/../app/build/bin/iosSimulatorArm64/debugFramework"
+    dependencies:
+      - framework:
+          path: ../app/build/bin/iosArm64/debugFramework/ComposeApp.framework
+          embed: true
+          codeSign: true
+    info:
+      path: iosApp/Info.plist
+
+schemes:
+  iosApp:
+    build:
+      targets:
+        iosApp: all
+    run:
+      config: Debug
+    archive:
+      config: Release

@@ -1,0 +1,43 @@
+# Gradle
+.gradle/
+build/
+*.class
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+captures/
+.externalNativeBuild/
+.cxx/
+*.ap_
+
+# Kotlin Multiplatform / iOS
+**/*.xcodeproj/
+**/*.xcworkspace/
+iosApp/build/
+app/build/
+
+# KMP build outputs
+*.framework
+*.dSYM
+
+# Python scripts (debug tools - non servono in produzione)
+*.py
+*.txt
+*.log
+
+# Codemagic / CI
+# (il codemagic.yaml DEVE essere versionato!)
+
+# Keystore e credenziali
+*.jks
+*.keystore
+keystore.properties
+google-services.json
+
+# macOS
+.DS_Store
+*.DS_Store

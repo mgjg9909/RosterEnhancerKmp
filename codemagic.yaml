@@ -1,0 +1,73 @@
+workflows:
+  ios-sideload:
+    name: "RosterEnhancer iOS - Sideload Build"
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      vars:
+        BUNDLE_ID: "com.matteo.rosterenhancer"
+        XCODE_SCHEME: "iosApp"
+        XCODE_WORKSPACE: "iosApp/iosApp.xcodeproj"
+      xcode: latest
+      java: 17
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+
+    scripts:
+      # 1. Compila il framework Kotlin Multiplatform per iOS ARM64
+      - name: "Build KMP Framework (iOS ARM64)"
+        script: |
+          ./gradlew :app:assembleReleaseXCFramework || \
+          ./gradlew :app:linkDebugFrameworkIosArm64
+
+      # 2. Installa XcodeGen se non presente
+      - name: "Install XcodeGen"
+        script: |
+          brew install xcodegen || true
+
+      # 3. Genera il progetto Xcode dal project.yml
+      - name: "Generate Xcode project"
+        script: |
+          cd iosApp
+          xcodegen generate
+
+      # 4. Imposta firma ad-hoc (sideloading, nessun account developer a pagamento richiesto)
+      - name: "Sign for Sideload (ad-hoc)"
+        script: |
+          cd iosApp
+          # Crea un certificato self-signed locale per la firma ad-hoc
+          # Codemagic userà le variabili d'ambiente del keychain se configurate,
+          # altrimenti firma con 'Sign to Run Locally'
+          security find-identity -v -p codesigning || true
+
+      # 5. Compila e archivia l'IPA
+      - name: "Build IPA for Sideload"
+        script: |
+          cd iosApp
+          xcodebuild \
+            -project iosApp.xcodeproj \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Debug \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/iosApp.xcarchive \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="-" \
+            DEVELOPMENT_TEAM="" \
+            archive
+
+          # Esporta l'IPA con metodo ad-hoc (sideloading)
+          xcodebuild \
+            -exportArchive \
+            -archivePath build/iosApp.xcarchive \
+            -exportPath build/output \
+            -exportOptionsPlist ../ExportOptions.plist
+
+    artifacts:
+      - iosApp/build/output/*.ipa
+      - iosApp/build/output/*.xcarchive
