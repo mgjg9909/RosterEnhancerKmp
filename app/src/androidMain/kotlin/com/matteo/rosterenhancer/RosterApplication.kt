@@ -16,11 +16,18 @@ import com.matteo.rosterenhancer.di.workerModule
 
 class RosterApplication : Application(), Configuration.Provider {
 
+    companion object {
+        /** Riferimento al context dell'applicazione. Non causa memory leak perché è il context dell'Application stessa. */
+        var appContext: Application? = null
+            private set
+    }
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .build()
 
     override fun onCreate() {
+        appContext = this
         // Inizializza Koin per la Dependency Injection
         initKoin {
             androidLogger()

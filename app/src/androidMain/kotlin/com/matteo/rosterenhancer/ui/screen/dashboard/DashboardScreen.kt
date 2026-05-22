@@ -95,6 +95,8 @@ fun DashboardScreen(
     var selectedShiftForNote by remember { mutableStateOf<Shift?>(null) }
 
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -111,7 +113,7 @@ fun DashboardScreen(
     // Gestione feedback sincronizzazione
     LaunchedEffect(uiState.syncResultMessage) {
         uiState.syncResultMessage?.let { message ->
-            android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show()
+            snackbarHostState.showSnackbar(message)
             viewModel.clearSyncMessage()
         }
     }
@@ -200,7 +202,8 @@ fun DashboardScreen(
                 )
             )
         },
-        containerColor = Color.Transparent
+        containerColor = Color.Transparent,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         val scrollState = rememberScrollState()
         Column(
