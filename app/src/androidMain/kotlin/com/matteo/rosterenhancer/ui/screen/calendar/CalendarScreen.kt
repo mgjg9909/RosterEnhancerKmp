@@ -211,10 +211,7 @@ fun CalendarScreen(
                     },
                     actions = {
                         IconButton(
-                            onClick = {
-                                val text = buildRosterShareText(myShifts, currentMonth)
-                                shareText(text)
-                            },
+                            onClick = { shareRoster(myShifts, currentMonth) },
                             modifier = Modifier
                         ) {
                             Icon(androidx.compose.material.icons.Icons.Default.Share, contentDescription = "Condividi il mio Roster via App")
@@ -1529,7 +1526,7 @@ private fun ColleaguesPeopleView(
 
 
 
-private fun shareRoster(context: android.content.Context, shifts: List<Shift>, month: YearMonth) {
+private fun shareRoster(shifts: List<Shift>, month: YearMonth) {
     if (shifts.isEmpty()) return
     
     val monthName = month.month.getDisplayName(com.matteo.rosterenhancer.util.TextStyle.FULL, com.matteo.rosterenhancer.util.Locale.ITALIAN).replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
@@ -1559,37 +1556,6 @@ private fun shareRoster(context: android.content.Context, shifts: List<Shift>, m
     val textToShare = "$title$body\n\n_Generato da RosterEnhancer_"
     shareText(textToShare)
 }
-
-private fun buildRosterShareText(shifts: List<Shift>, month: YearMonth): String {
-    if (shifts.isEmpty()) return ""
-    val formatter = DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.ITALIAN)
-    val title = "\uD83D\uDCC6 Il mio Roster ${month.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ITALIAN)).replaceFirstChar { it.uppercase() }}\n\n"
-    val body = shifts
-        .sortedBy { it.date }
-        .joinToString("\n") { shift ->
-            val dateStr = shift.date.format(formatter).replaceFirstChar { it.uppercase() }
-            val shiftVal = when (shift.shiftType) {
-                com.matteo.rosterenhancer.domain.model.ShiftType.WORK -> {
-                    val s = shift.startTime?.let { "${it.hour.toString().padStart(2,'0')}:${it.minute.toString().padStart(2,'0')}" } ?: ""
-                    val e = shift.endTime?.let { "${it.hour.toString().padStart(2,'0')}:${it.minute.toString().padStart(2,'0')}" } ?: ""
-                    "\uD83D\uDCBC Turno $s-$e"
-                }
-                com.matteo.rosterenhancer.domain.model.ShiftType.REST -> "\uD83C\uDFE0 Riposo"
-                com.matteo.rosterenhancer.domain.model.ShiftType.REST_2 -> "\uD83C\uDFE0 Riposo"
-                com.matteo.rosterenhancer.domain.model.ShiftType.DAY_OFF -> "\uD83C\uDF34 Giorno Libero"
-                com.matteo.rosterenhancer.domain.model.ShiftType.VACATION -> "\u2708\uFE0F Ferie"
-                com.matteo.rosterenhancer.domain.model.ShiftType.SICK_LEAVE -> "\uD83C\uDFE5 Malattia"
-                com.matteo.rosterenhancer.domain.model.ShiftType.PARENTAL_LEAVE -> "Congedo"
-                else -> "\u2014"
-            }
-            "\uD83D\uDDD3 $dateStr: $shiftVal"
-        }
-    return "$title$body\n\n_Generato da RosterEnhancer_"
-}
-
-
-
-
 
 
 
