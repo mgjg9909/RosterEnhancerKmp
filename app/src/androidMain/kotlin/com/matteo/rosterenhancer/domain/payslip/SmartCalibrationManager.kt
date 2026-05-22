@@ -12,6 +12,7 @@ import com.matteo.rosterenhancer.data.local.entity.PayslipEntity
 import com.matteo.rosterenhancer.domain.calculator.SalaryCalculator
 import com.matteo.rosterenhancer.domain.model.GpgProfile
 import com.matteo.rosterenhancer.domain.model.Shift
+import com.matteo.rosterenhancer.domain.payslip.PayslipProcessor
 import com.matteo.rosterenhancer.util.DataStoreManager
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.LocalDate
@@ -35,11 +36,16 @@ class SmartCalibrationManager constructor(
     private val payslipDao: PayslipDao,
     private val shiftDao: ShiftDao,
     private val dataStoreManager: DataStoreManager
-) {
+) : PayslipProcessor {
     /**
      * Analizza un file, estrae i dati e calcola le discrepanze
      */
-    suspend fun processNewPayslip(uri: Uri, isPdf: Boolean): CalibrationResult {
+    override suspend fun processNewPayslip(fileBytes: ByteArray, fileName: String, isPdf: Boolean): CalibrationResult {
+        // Salva il bytearray su un file temporaneo per ottenere l'Uri
+        val tempFile = File(context.cacheDir, fileName)
+        tempFile.writeBytes(fileBytes)
+        val uri = Uri.fromFile(tempFile)
+        
         // Ottieni le pagine come testo OCR (per il parser regex) e come bitmap (per Gemini Vision)
         val pages = if (isPdf) ocrManager.analyzePdf(uri) else listOf(ocrManager.analyzeImage(uri))
         val bitmapPages = if (isPdf) ocrManager.getPdfBitmaps(uri) else listOf(ocrManager.getImageBitmap(uri)).filterNotNull()
@@ -119,7 +125,7 @@ class SmartCalibrationManager constructor(
         return CalibrationResult.Success(extracted, delta, totalTheoreticalNet, geminiFailReason = geminiFailReason)
     }
 
-    suspend fun applyCalibration(delta: Double, month: Int, year: Int) {
+    override suspend fun applyCalibration(delta: Double, month: Int, year: Int) {
         val profile = getCurrentProfile()
         // Algoritmo semplice: se il netto reale è diverso, aggiustiamo la taxRate stimata
         // Delta = NetReal - NetTheo -> Se positivo, le tasse erano stimate troppo alte.
@@ -174,6 +180,15 @@ class SmartCalibrationManager constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+    
+    override fun deleteFile(filePath: String) {
+        try {
+            val file = File(filePath)
+            if (file.exists()) file.delete()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

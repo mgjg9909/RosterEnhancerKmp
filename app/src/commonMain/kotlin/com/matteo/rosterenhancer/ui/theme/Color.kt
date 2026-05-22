@@ -41,7 +41,3 @@ val White           = Color(0xFFFFFFFF)
 val TextPrimary     = Color(0xFFE2E8F0)
 val TextSecondary   = Color(0xFF94A3B8)
 val TextDisabled    = Color(0xFF4A5568)
-
-
-
-

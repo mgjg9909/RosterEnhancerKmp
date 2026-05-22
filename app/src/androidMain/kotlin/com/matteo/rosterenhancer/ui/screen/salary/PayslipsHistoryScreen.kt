@@ -24,6 +24,9 @@ import com.matteo.rosterenhancer.data.local.entity.LearningLogEntity
 import com.matteo.rosterenhancer.data.local.entity.PayslipEntity
 import com.matteo.rosterenhancer.util.DateTimeFormatter
 import com.matteo.rosterenhancer.util.getMonthName
+import androidx.compose.ui.platform.LocalContext
+import android.content.Context
+import android.provider.OpenableColumns
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,15 +40,36 @@ fun PayslipsHistoryScreen(
     val logs by viewModel.learningLogs.collectAsState()
     
     var selectedTab by remember { mutableIntStateOf(0) }
-    
+    val context = LocalContext.current
+
     val pdfLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
-        onResult = { uri -> uri?.let { viewModel.processPayslip(it, isPdf = true) } }
+        onResult = { uri -> 
+            uri?.let { 
+                val fileName = getFileName(context, it) ?: "payslip.pdf"
+                val stream = context.contentResolver.openInputStream(it)
+                if (stream != null) {
+                    val bytes = stream.readBytes()
+                    viewModel.processPayslip(bytes, fileName, isPdf = true)
+                    stream.close()
+                }
+            } 
+        }
     )
     
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
-        onResult = { uri -> uri?.let { viewModel.processPayslip(it, isPdf = false) } }
+        onResult = { uri -> 
+            uri?.let { 
+                val fileName = getFileName(context, it) ?: "payslip.jpg"
+                val stream = context.contentResolver.openInputStream(it)
+                if (stream != null) {
+                    val bytes = stream.readBytes()
+                    viewModel.processPayslip(bytes, fileName, isPdf = false)
+                    stream.close()
+                }
+            } 
+        }
     )
 
     var showUploadDialog by remember { mutableStateOf(false) }
@@ -297,9 +321,13 @@ fun LearningLogsList(logs: List<LearningLogEntity>, onDeleteLog: (LearningLogEnt
     }
 }
 
-
-
-
-
-
-
+private fun getFileName(context: Context, uri: android.net.Uri): String? {
+    var name: String? = null
+    context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        if (cursor.moveToFirst() && nameIndex >= 0) {
+            name = cursor.getString(nameIndex)
+        }
+    }
+    return name
+}

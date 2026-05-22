@@ -1,23 +1,22 @@
 package com.matteo.rosterenhancer.ui.screen.salary
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.matteo.rosterenhancer.data.local.dao.PayslipDao
 import com.matteo.rosterenhancer.data.local.entity.LearningLogEntity
 import com.matteo.rosterenhancer.data.local.entity.PayslipEntity
 import com.matteo.rosterenhancer.domain.payslip.CalibrationResult
-import com.matteo.rosterenhancer.domain.payslip.SmartCalibrationManager
+import com.matteo.rosterenhancer.domain.payslip.PayslipProcessor
 
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.File
+
 
 
 
 class PayslipViewModel constructor(
     private val payslipDao: PayslipDao,
-    private val calibrationManager: SmartCalibrationManager
+    private val calibrationManager: PayslipProcessor
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PayslipUiState())
@@ -29,12 +28,12 @@ class PayslipViewModel constructor(
     val learningLogs: StateFlow<List<LearningLogEntity>> = payslipDao.getAllLearningLogs()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun processPayslip(uri: Uri, isPdf: Boolean) {
+    fun processPayslip(fileBytes: ByteArray, fileName: String, isPdf: Boolean) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, lastResult = null) }
             
             try {
-                val result = calibrationManager.processNewPayslip(uri, isPdf)
+                val result = calibrationManager.processNewPayslip(fileBytes, fileName, isPdf)
                 _uiState.update { 
                     it.copy(
                         isLoading = false, 
@@ -67,8 +66,7 @@ class PayslipViewModel constructor(
         viewModelScope.launch {
             payslip.filePath?.let { path ->
                 try {
-                    val file = File(path)
-                    if (file.exists()) file.delete()
+                    calibrationManager.deleteFile(path)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

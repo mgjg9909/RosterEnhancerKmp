@@ -30,12 +30,14 @@ private const val TAG = "XlsxParser"
  *  - Nome + matricola in colonna separata o stessa cella con \n
  */
 @Singleton
-class XlsxParser @Inject constructor() {
+class XlsxParserImpl @Inject constructor() : XlsxParser {
 
-    fun parse(inputStream: InputStream, monthRosterId: Long = 0): ParseResult {
-        // Leggi tutto il file ZIP in memoria
-        val entries = mutableMapOf<String, ByteArray>()
-        ZipInputStream(inputStream.buffered()).use { zip ->
+    override suspend fun parse(fileBytes: ByteArray): ParseResult {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            // Leggi tutto il file ZIP in memoria
+            val entries = mutableMapOf<String, ByteArray>()
+            val inputStream = java.io.ByteArrayInputStream(fileBytes)
+            ZipInputStream(inputStream.buffered()).use { zip ->
             var entry = zip.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory) entries[entry.name] = zip.readBytes()
@@ -59,7 +61,7 @@ class XlsxParser @Inject constructor() {
         
         Log.d(TAG, "Sheet keys found: $sheetKeys")
         if (sheetKeys.isEmpty()) {
-            return ParseResult(emptyList(), emptyList(), 0, 0,
+            return@withContext ParseResult(emptyList(), emptyList(), 0, 0,
                 debugInfo = "Nessun foglio trovato nel file. Entries: ${entries.keys}")
         }
 
@@ -77,7 +79,7 @@ class XlsxParser @Inject constructor() {
             val rawRows = parseSheet(entries[sheetKey]!!.inputStream(), sharedStrings)
             if (rawRows.isEmpty()) continue
             
-            val sheetResult = buildRoster(rawRows, monthRosterId, "Sheet: $sheetKey")
+            val sheetResult = buildRoster(rawRows, 0L, "Sheet: $sheetKey")
             
             // Unione intelligente: evita duplicati di dipendenti
             sheetResult.employees.forEach { emp ->
@@ -97,13 +99,14 @@ class XlsxParser @Inject constructor() {
 
         Log.d(TAG, "Combined Result: ${allEmployees.size} employees, ${allShifts.size} shifts")
         
-        return ParseResult(
+        return@withContext ParseResult(
             employees = allEmployees,
             shifts = allShifts,
             month = mainMonth,
             year = mainYear,
             debugInfo = debugBuilder.toString()
         )
+        }
     }
 
     // ─── Shared Strings ──────────────────────────────────────────────────────
@@ -458,12 +461,12 @@ class XlsxParser @Inject constructor() {
      *   - Cifra 4   = durata in ore
      * Es: "0338 BAG" → 03:30, 8h, mansione BAG → fine 11:30
      */
-    fun parseShiftCell(
+    override fun parseShiftCell(
         rawCode: String,
         employeeId: String,
         employeeName: String,
         date: LocalDate,
-        monthRosterId: Long = 0
+        monthRosterId: Long
     ): Shift {
         val nameNorm = employeeName.uppercase().trim()
         val code = rawCode.trim().uppercase()

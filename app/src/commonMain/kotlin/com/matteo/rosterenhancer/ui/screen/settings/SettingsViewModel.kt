@@ -54,8 +54,8 @@ class SettingsViewModel constructor(
     init {
         viewModelScope.launch {
             // Carica credenziali esistenti su IO per evitare ANR con EncryptedSharedPreferences
-            val user = withContext(Dispatchers.IO) { credentialsManager.getUsername() ?: "" }
-            val pass = withContext(Dispatchers.IO) { credentialsManager.getPassword() ?: "" }
+            val user = withContext(Dispatchers.Default) { credentialsManager.getUsername() ?: "" }
+            val pass = withContext(Dispatchers.Default) { credentialsManager.getPassword() ?: "" }
             _uiState.update { it.copy(cloudUser = user, cloudPass = pass) }
         }
 
@@ -145,7 +145,7 @@ class SettingsViewModel constructor(
                     _uiState.update { it.copy(isSyncing = false, syncStatus = msg) }
                 }
                 .onFailure { err ->
-                    _uiState.update { it.copy(isSyncing = false, syncStatus = "Errore: ${err.localizedMessage}") }
+                    _uiState.update { it.copy(isSyncing = false, syncStatus = "Errore: ${err.message}") }
                 }
         }
     }

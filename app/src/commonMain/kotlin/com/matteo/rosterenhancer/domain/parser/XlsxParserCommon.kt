@@ -2,6 +2,7 @@ package com.matteo.rosterenhancer.domain.parser
 
 import com.matteo.rosterenhancer.domain.model.Employee
 import com.matteo.rosterenhancer.domain.model.Shift
+import kotlinx.datetime.LocalDate
 
 /**
  * Shared data class for the result of an XLSX parse operation.
@@ -16,3 +17,15 @@ data class ParseResult(
     val fileName: String = "",
     val debugInfo: String = ""
 )
+
+interface XlsxParser {
+    suspend fun parse(fileBytes: ByteArray): ParseResult
+    
+    fun parseShiftCell(
+        rawCode: String,
+        employeeId: String,
+        employeeName: String,
+        date: LocalDate,
+        monthRosterId: Long = 0
+    ): Shift
+}

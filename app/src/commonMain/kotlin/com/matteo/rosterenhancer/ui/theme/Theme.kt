@@ -4,15 +4,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
+// ─── Color Schemes ────────────────────────────────────────────────────────────
+
+val DarkColorScheme = darkColorScheme(
     primary          = BluePrimary,
     onPrimary        = White,
     primaryContainer = Color(0xFF1E3A8A),
@@ -34,7 +30,7 @@ private val DarkColorScheme = darkColorScheme(
     onError          = White
 )
 
-private val LightColorScheme = lightColorScheme(
+val LightColorScheme = lightColorScheme(
     primary          = BlueDark,
     onPrimary        = White,
     primaryContainer = SurfaceLight2,
@@ -52,26 +48,22 @@ private val LightColorScheme = lightColorScheme(
     onError          = White
 )
 
+// ─── Common Theme Wrapper ─────────────────────────────────────────────────────
+
+/**
+ * Composable comune che applica il tema Material3.
+ * La personalizzazione platform-specific (es. status bar color su Android)
+ * viene gestita tramite [PlatformThemeEffect], chiamato dall'implementazione Android.
+ */
 @Composable
 fun RosterEnhancerTheme(
     darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-    val view = LocalView.current
 
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as android.app.Activity).window
-            window.statusBarColor = Color.Transparent.toArgb()
-            window.navigationBarColor = Color.Transparent.toArgb()
-            
-            val controller = WindowCompat.getInsetsController(window, view)
-            // Se siamo in DarkMode, NON vogliamo icone "Light" (cioè nere), vogliamo icone bianche
-            controller.isAppearanceLightStatusBars = !darkTheme
-            controller.isAppearanceLightNavigationBars = !darkTheme
-        }
-    }
+    // Effetto platform-specific (status bar, navigation bar)
+    PlatformThemeEffect(darkTheme = darkTheme)
 
     MaterialTheme(
         colorScheme = colorScheme,
@@ -79,6 +71,8 @@ fun RosterEnhancerTheme(
         content = content
     )
 }
+
+// ─── Helper Functions ─────────────────────────────────────────────────────────
 
 /** Restituisce il colore associato al tipo di turno */
 fun shiftTypeColor(shiftType: String): Color = when (shiftType) {
@@ -93,12 +87,6 @@ fun shiftTypeColor(shiftType: String): Color = when (shiftType) {
 
 /**
  * Restituisce il colore del turno lavorativo in base all'ora di inizio.
- *
- * Fasce aziendali:
- *   🌅 Mattina   → dalle 03:00 (< 07:00)
- *   ☀️ Centrale  → dalle 07:00 (< 12:00)
- *   🌆 Pomeriggio → dalle 12:00 (< 19:00)
- *   🌙 Notte     → dalle 19:00 (o < 03:00)
  */
 fun workShiftColor(startHour: Int?): Color = when {
     startHour == null                        -> ShiftOther
@@ -116,7 +104,3 @@ fun workShiftLabel(startHour: Int?): String = when {
     startHour in 7 until 12                 -> "Centrale"
     else                                    -> "Pomeriggio"
 }
-
-
-
-

@@ -13,7 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import com.matteo.rosterenhancer.R
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -33,7 +33,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.matteo.rosterenhancer.data.local.entity.MonthRosterEntity
 import com.matteo.rosterenhancer.util.DataStoreManager
 import com.matteo.rosterenhancer.util.getMonthName
-import androidx.compose.ui.res.painterResource
+
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip

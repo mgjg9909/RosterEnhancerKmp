@@ -1,6 +1,5 @@
 package com.matteo.rosterenhancer.ui.screen.importscreen
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.matteo.rosterenhancer.data.repository.RosterRepository
@@ -31,11 +30,11 @@ class ImportViewModel constructor(
     private val _state = MutableStateFlow<ImportState>(ImportState.Idle)
     val state: StateFlow<ImportState> = _state.asStateFlow()
 
-    fun parseFile(inputStream: java.io.InputStream, fileName: String) {
+    fun parseFile(fileBytes: ByteArray, fileName: String) {
         viewModelScope.launch {
             _state.value = ImportState.Loading
             try {
-                val result = xlsxParser.parse(inputStream)
+                val result = xlsxParser.parse(fileBytes)
                 if (result.employees.isEmpty() || result.shifts.isEmpty()) {
                     _state.value = ImportState.Error(
                         "Nessun dato trovato nel file.\n\nDEBUG:\n${result.debugInfo}"

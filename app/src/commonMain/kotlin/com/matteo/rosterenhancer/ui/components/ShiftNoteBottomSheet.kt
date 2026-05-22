@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.matteo.rosterenhancer.domain.model.Shift
 import com.matteo.rosterenhancer.domain.model.ShiftNote
-import com.matteo.rosterenhancer.ui.screen.salary.WheelPicker
+import com.matteo.rosterenhancer.ui.components.WheelPicker
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import com.matteo.rosterenhancer.util.DateTimeFormatter

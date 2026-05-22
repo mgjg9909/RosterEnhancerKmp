@@ -14,6 +14,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import com.matteo.rosterenhancer.domain.parser.XlsxParser
+import com.matteo.rosterenhancer.domain.parser.XlsxParserImpl
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 
@@ -47,7 +48,10 @@ actual val platformModule: Module = module {
         }
     }
 
-    singleOf(::XlsxParser)
+    single<com.matteo.rosterenhancer.domain.payslip.PayslipProcessor> {
+        com.matteo.rosterenhancer.domain.payslip.SmartCalibrationManager(get(), get(), get(), get(), get(), get(), get())
+    }
+    single<XlsxParser> { XlsxParserImpl() }
     single<com.matteo.rosterenhancer.data.network.IRosterScraper> {
         com.matteo.rosterenhancer.data.network.RosterScraper(get(), get(), get())
     }

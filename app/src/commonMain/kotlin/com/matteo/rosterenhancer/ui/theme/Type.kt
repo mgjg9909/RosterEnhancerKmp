@@ -2,13 +2,9 @@ package com.matteo.rosterenhancer.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Usa Inter via Google Fonts (aggiunto come resource font in futuro)
-// Per ora usa il font di sistema (san-serif)
 val RosterTypography = Typography(
     displayLarge = TextStyle(
         fontWeight = FontWeight.Bold,
@@ -83,7 +79,3 @@ val RosterTypography = Typography(
         letterSpacing = 0.5.sp
     )
 )
-
-
-
-

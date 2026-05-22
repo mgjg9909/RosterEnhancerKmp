@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.matteo.rosterenhancer.domain.model.Shift
 import com.matteo.rosterenhancer.domain.model.ShiftType
-import com.matteo.rosterenhancer.ui.screen.salary.WheelPicker
+import com.matteo.rosterenhancer.ui.components.WheelPicker
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone

@@ -41,18 +41,12 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import com.matteo.rosterenhancer.util.formatDecimal
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.blur
 import com.matteo.rosterenhancer.ui.components.GlassCard
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
 import org.koin.compose.viewmodel.koinViewModel
 import com.matteo.rosterenhancer.domain.model.Shift
 import com.matteo.rosterenhancer.domain.model.ShiftType
@@ -90,25 +84,14 @@ fun DashboardScreen(
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val uiState by viewModel.uiState.collectAsState()
     val today = LocalDate.now()
-    val context = LocalContext.current
-
+    
     var selectedShiftForNote by remember { mutableStateOf<Shift?>(null) }
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            val shifts = uiState.upcomingShifts.toMutableList()
-            uiState.todayShift?.let { shifts.add(it) }
-            scope.launch {
-                NotificationScheduler.scheduleShiftReminders(context, shifts)
-            }
-        }
-    }
+
 
     // Gestione feedback sincronizzazione
     LaunchedEffect(uiState.syncResultMessage) {
@@ -125,10 +108,10 @@ fun DashboardScreen(
                     Column {
                         val hour = LocalTime.now().hour
                         val (greeting, emoji) = when (hour) {
-                            in 5..11 -> "Buongiorno" to "☕"
-                            in 12..17 -> "Buon pomeriggio" to "☀️"
-                            in 18..22 -> "Buonasera" to "🌙"
-                            else -> "Buonanotte" to "😴"
+                            in 5..11 -> "Buongiorno" to "Ôÿò"
+                            in 12..17 -> "Buon pomeriggio" to "ÔÿÇ´©Å"
+                            in 18..22 -> "Buonasera" to "­ƒîÖ"
+                            else -> "Buonanotte" to "­ƒÿ┤"
                         }
                         Text(
                             text = "$greeting, ${uiState.selfName.split(" ").lastOrNull() ?: ""}! $emoji",
@@ -377,8 +360,7 @@ fun DashboardScreen(
         androidx.compose.ui.window.Dialog(
             onDismissRequest = { viewModel.selectColleagueForSharedShifts(null) },
             properties = androidx.compose.ui.window.DialogProperties(
-                usePlatformDefaultWidth = false,
-                decorFitsSystemWindows = false
+                usePlatformDefaultWidth = false
             )
         ) {
             androidx.compose.animation.AnimatedVisibility(
@@ -413,7 +395,7 @@ private fun TodayShiftCard(
         shape = RoundedCornerShape(32.dp),
         containerColor = shiftColor,
         glassAlpha = if (isDark) 0.15f else 0.08f,
-        borderAlpha = 0.35f // Più marcato per coerenza
+        borderAlpha = 0.35f // Pi├╣ marcato per coerenza
     ) {
         Box(
             modifier = Modifier
@@ -474,7 +456,7 @@ private fun TodayShiftCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "${shift.durationHours} ore lavorative  •  ${shift.role ?: ""}",
+                            text = "${shift.durationHours} ore lavorative  ÔÇó  ${shift.role ?: ""}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -542,11 +524,11 @@ private fun ShiftCountdownBox(shift: Shift, isUpcoming: Boolean, note: ShiftNote
             val seconds = (duration.toMillis() / 1000) % 60
             
             if (isSmall) {
-                if (days > 0) "Inizia %dg".format(days)
-                else "%02d:%02d:%02d".format(hours, minutes, seconds)
+                if (days > 0) "Inizia ${days}g"
+                else "${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
             } else {
-                if (days > 0) "Inizia tra %dg %dh %dm".format(days, hours, minutes)
-                else "Inizia tra %02dh %02dm %02ds".format(hours, minutes, seconds)
+                if (days > 0) "Inizia tra ${days}g ${hours}h ${minutes}m"
+                else "Inizia tra ${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s"
             }
         } else {
             val start = shift.startTime ?: return@remember null
@@ -561,13 +543,13 @@ private fun ShiftCountdownBox(shift: Shift, isUpcoming: Boolean, note: ShiftNote
                     val d = if (currentTime < end) Duration.between(currentTime, end)
                             else Duration.between(currentTime, LocalTime(23, 59, 59)).plus(Duration.between(LocalTime(0, 0), end))
                     
-                    if (isSmall) "%02d:%02d:%02d".format(d.toHours(), d.toMinutes() % 60, (d.toMillis() / 1000) % 60)
-                    else "Fine tra %02dh %02dm %02ds".format(d.toHours(), d.toMinutes() % 60, (d.toMillis() / 1000) % 60)
+                    if (isSmall) "${d.toHours().toString().padStart(2, '0')}:${(d.toMinutes() % 60).toString().padStart(2, '0')}:${((d.toMillis() / 1000) % 60).toString().padStart(2, '0')}"
+                    else "Fine tra ${d.toHours().toString().padStart(2, '0')}h ${(d.toMinutes() % 60).toString().padStart(2, '0')}m ${((d.toMillis() / 1000) % 60).toString().padStart(2, '0')}s"
                 }
                 !isFinished && currentTime < start -> {
                     val d = Duration.between(currentTime, start)
-                    if (isSmall) "%02d:%02d:%02d".format(d.toHours(), d.toMinutes() % 60, (d.toMillis() / 1000) % 60)
-                    else "Inizia tra %02dh %02dm %02ds".format(d.toHours(), d.toMinutes() % 60, (d.toMillis() / 1000) % 60)
+                    if (isSmall) "${d.toHours().toString().padStart(2, '0')}:${(d.toMinutes() % 60).toString().padStart(2, '0')}:${((d.toMillis() / 1000) % 60).toString().padStart(2, '0')}"
+                    else "Inizia tra ${d.toHours().toString().padStart(2, '0')}h ${(d.toMinutes() % 60).toString().padStart(2, '0')}m ${((d.toMillis() / 1000) % 60).toString().padStart(2, '0')}s"
                 }
                 else -> if (isSmall) "Finito" else "Turno concluso"
             }
@@ -699,7 +681,7 @@ private fun UpcomingShiftTimelineItem(
             shape = RoundedCornerShape(20.dp),
             containerColor = MaterialTheme.colorScheme.surface,
             glassAlpha = if (isDark) 0.15f else 0.12f,
-            borderAlpha = 0.4f, // Molto più definito
+            borderAlpha = 0.4f, // Molto pi├╣ definito
             onClick = onClick
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
@@ -714,7 +696,7 @@ private fun UpcomingShiftTimelineItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = if (shift.shiftType == ShiftType.WORK) {
-                            "${shift.timeRange} • ${shift.role ?: "Turno"}"
+                            "${shift.timeRange} ÔÇó ${shift.role ?: "Turno"}"
                         } else {
                             shiftTypeLabel(shift.shiftType)
                         },
@@ -764,20 +746,20 @@ private fun AnimatedDashboardBackground(todayShift: Shift?) {
             brush = Brush.radialGradient(
                 colors = listOf(centerColor, edgeColor),
                 center = center.copy(
-                    x = center.x + (size.width * 0.4f * Math.cos(Math.toRadians(phase.toDouble())).toFloat()),
-                    y = center.y + (size.height * 0.3f * Math.sin(Math.toRadians(phase.toDouble())).toFloat())
+                    x = center.x + (size.width * 0.4f * kotlin.math.cos((kotlin.math.PI / 180.0 * phase.toDouble())).toFloat()),
+                    y = center.y + (size.height * 0.3f * kotlin.math.sin((kotlin.math.PI / 180.0 * phase.toDouble())).toFloat())
                 ),
                 radius = size.minDimension * 1.2f
             )
         )
         
-        // Orb 2: Più piccolo e veloce (o sfasato)
+        // Orb 2: Pi├╣ piccolo e veloce (o sfasato)
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(centerColor.copy(alpha = 0.10f), edgeColor),
                 center = center.copy(
-                    x = center.x + (size.width * 0.5f * Math.cos(Math.toRadians(phase.toDouble() + 180)).toFloat()),
-                    y = center.y + (size.height * 0.4f * Math.sin(Math.toRadians(phase.toDouble() + 90)).toFloat())
+                    x = center.x + (size.width * 0.5f * kotlin.math.cos((kotlin.math.PI / 180.0 * phase.toDouble() + 180)).toFloat()),
+                    y = center.y + (size.height * 0.4f * kotlin.math.sin((kotlin.math.PI / 180.0 * phase.toDouble() + 90)).toFloat())
                 ),
                 radius = size.minDimension * 0.9f
             )
@@ -1020,7 +1002,7 @@ private fun LiveColleaguesWidget(
             } else {
                 items(
                     items = colleagues,
-                    key = { it.employeeId + it.date.toString() } // Chiave univoca per stabilità
+                    key = { it.employeeId + it.date.toString() } // Chiave univoca per stabilit├á
                 ) { colleague ->
                     ColleagueLiveCard(
                         colleague = colleague,
@@ -1184,7 +1166,7 @@ private fun EarningBentoCard(amount: Double, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "€${String.format("%.2f", amount)}",
+                    text = "Ôé¼${amount.formatDecimal()}",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontWeight = FontWeight.ExtraBold
@@ -1235,7 +1217,7 @@ private fun UpcomingShiftsSection(
             ) {
                 items(chunks) { chunk ->
                     Column(
-                        modifier = Modifier.width(200.dp) // Leggermente più stretto per compattezza
+                        modifier = Modifier.width(200.dp) // Leggermente pi├╣ stretto per compattezza
                     ) {
                         chunk.forEachIndexed { index, shift ->
                             UpcomingShiftTimelineItem(
@@ -1664,7 +1646,7 @@ private fun SmallTodayShiftCard(shift: Shift?) {
                 textAlign = TextAlign.Center
             )
 
-            // Aggiunto Countdown anche qui per massima visibilità
+            // Aggiunto Countdown anche qui per massima visibilit├á
             if (shift?.shiftType == ShiftType.WORK) {
                 Spacer(Modifier.height(4.dp))
                 // Step 4: Versione compatta del progresso per la card piccola
@@ -1702,7 +1684,7 @@ private fun SmallTodayEarningsCard(amount: Double) {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "€${String.format("%.2f", amount)}",
+                "Ôé¼${amount.formatDecimal()}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Black

@@ -53,11 +53,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.matteo.rosterenhancer.ui.navigation.Screen
-import com.matteo.rosterenhancer.ui.screen.calendar.CalendarScreen
+import com.matteo.rosterenhancer.ui.screen.stubs.*
 import com.matteo.rosterenhancer.ui.screen.dashboard.DashboardScreen
-import com.matteo.rosterenhancer.ui.screen.stats.StatsScreen
-import com.matteo.rosterenhancer.ui.screen.salary.SalaryScreen
-import com.matteo.rosterenhancer.ui.screen.salary.SalaryViewModel
 
 sealed class TabScreen(val route: String, val label: String, val icon: ImageVector, val selectedIcon: ImageVector, val index: Int, val color: Color) {
     object Home   : TabScreen(Screen.Dashboard.route, "Home",     Icons.Outlined.Home,          Icons.Filled.Home,          0, BluePrimary)
@@ -185,7 +182,7 @@ fun MainScreen(
                                     val currentStretchX = (rightEdge - leftEdge).coerceAtLeast(0.1f)
                                     val stretchAmount = (currentStretchX - 1f).coerceAtLeast(0f)
                                     
-                                    // Più si allunga sull'asse X, più si schiaccia sull'asse Y (preserva il volume)
+                                    // PiÃ¹ si allunga sull'asse X, piÃ¹ si schiaccia sull'asse Y (preserva il volume)
                                     val scaleY = 1f - (stretchAmount * 0.35f).coerceAtMost(0.5f)
                                     
                                     val verticalPadding = 8.dp.toPx()
@@ -209,7 +206,7 @@ fun MainScreen(
                                     val rectTopLeft = androidx.compose.ui.geometry.Offset(rectLeft, top)
                                     val cornerRadius = androidx.compose.ui.geometry.CornerRadius(rectSize.height / 2)
 
-                                    // Gradiente principale della bolla (più intenso in alto)
+                                    // Gradiente principale della bolla (piÃ¹ intenso in alto)
                                     drawRoundRect(
                                         brush = Brush.verticalGradient(
                                             listOf(
@@ -267,7 +264,7 @@ fun MainScreen(
                                             indication = null
                                         ) {
                                             navController.navigate(item.route) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                popUpTo(navController.graph.findStartDestination().route!!) {
                                                     saveState = true
                                                 }
                                                 launchSingleTop = true
@@ -315,7 +312,7 @@ fun MainScreen(
 
         val navigateToTab = { route: String ->
             navController.navigate(route) {
-                popUpTo(navController.graph.findStartDestination().id) {
+                popUpTo(navController.graph.findStartDestination().route!!) {
                     saveState = true
                 }
                 launchSingleTop = true
@@ -346,22 +343,22 @@ fun MainScreen(
                 )
             }
             composable(Screen.Calendar.route) {
-                CalendarScreen()
+                CalendarScreenStub()
             }
             composable(Screen.Swaps.route) {
-                com.matteo.rosterenhancer.ui.screen.swaps.SwapsScreen(onBack = {
+                SwapsScreenStub(onBack = {
                     navController.navigate(TabScreen.Home.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                        popUpTo(navController.graph.findStartDestination().route!!) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
                 })
             }
             composable(Screen.Salary.route) {
-                SalaryScreen(
+                SalaryScreenStub(
                     onBack = {
                         navController.navigate(TabScreen.Home.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            popUpTo(navController.graph.findStartDestination().route!!) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -380,7 +377,7 @@ private fun MeshGradientBackground() {
     val color2 = MaterialTheme.colorScheme.surface
     val color3 = MaterialTheme.colorScheme.surfaceVariant
     
-    // Possiamo dedurre se è dark mode controllando la luminosità del background
+    // Possiamo dedurre se Ã¨ dark mode controllando la luminositÃ  del background
     val isDark = color1.luminance() < 0.5f
 
     Box(modifier = Modifier.fillMaxSize().background(
@@ -407,6 +404,7 @@ private fun MeshGradientBackground() {
         }
     }
 }
+
 
 
 

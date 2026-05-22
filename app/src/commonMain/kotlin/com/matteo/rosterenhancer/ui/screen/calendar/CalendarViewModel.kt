@@ -64,7 +64,7 @@ class CalendarViewModel constructor(
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
 
     init {
-        if (com.matteo.rosterenhancer.BuildConfig.DEBUG) println("CalendarViewModel" + ": " + "Costruttore avviato")
+        println("CalendarViewModel" + ": " + "Costruttore avviato")
         // [DIAGNOSTICA] Disattivata sincronizzazione automatica all'avvio del tab
         /*
         viewModelScope.launch {
@@ -91,12 +91,12 @@ class CalendarViewModel constructor(
         _currentMonth,
         dataStoreManager.selfMatricola
     ) { month, matricola -> 
-        if (com.matteo.rosterenhancer.BuildConfig.DEBUG) println("CalendarViewModel" + ": " + "FLOW_DEBUG: Mese=$month, Matricola='$matricola'")
+        println("CalendarViewModel" + ": " + "FLOW_DEBUG: Mese=$month, Matricola='$matricola'")
         Pair(month, matricola) 
     }
         .flatMapLatest { (month, matricola) ->
             if (matricola.isBlank()) {
-                if (com.matteo.rosterenhancer.BuildConfig.DEBUG) println("CalendarViewModel" + ": " + "DIAGNOSTICA: Matricola VUOTA, cerco turni per ID 'self' come fallback")
+                println("CalendarViewModel" + ": " + "DIAGNOSTICA: Matricola VUOTA, cerco turni per ID 'self' come fallback")
                 repository.getShiftsForEmployeeInRange(
                     employeeId = "self",
                     from = month.atDay(1),
@@ -108,7 +108,7 @@ class CalendarViewModel constructor(
                     from = month.atDay(1),
                     to = month.atEndOfMonth()
                 ).onEach { list ->
-                    if (com.matteo.rosterenhancer.BuildConfig.DEBUG) println("CalendarViewModel" + ": " + "DIAGNOSTICA: Mese=${month}, Matricola=${matricola}, TurniTrovati=${list.size}")
+                    println("CalendarViewModel" + ": " + "DIAGNOSTICA: Mese=${month}, Matricola=${matricola}, TurniTrovati=${list.size}")
                 }
             }
         }
@@ -123,7 +123,7 @@ class CalendarViewModel constructor(
             if (date == null) flowOf(emptyList())
             else repository.getShiftsForDate(date).map { shifts ->
                 val filtered = applyFiltersAndSort(shifts, ui)
-                if (com.matteo.rosterenhancer.BuildConfig.DEBUG) println("CalendarViewModel" + ": " + "DIAGNOSTICA: Giorno=${date}, Totali=${shifts.size}, Filtrati=${filtered.size}")
+                println("CalendarViewModel" + ": " + "DIAGNOSTICA: Giorno=${date}, Totali=${shifts.size}, Filtrati=${filtered.size}")
                 filtered
             }
         }

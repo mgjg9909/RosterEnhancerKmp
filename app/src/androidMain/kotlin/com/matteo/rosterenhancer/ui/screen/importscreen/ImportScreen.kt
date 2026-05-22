@@ -54,7 +54,9 @@ fun ImportScreen(
             val fileName = getFileName(context, it)
             val stream = context.contentResolver.openInputStream(it)
             if (stream != null) {
-                viewModel.parseFile(stream, fileName)
+                val bytes = stream.readBytes()
+                viewModel.parseFile(bytes, fileName)
+                stream.close()
             }
         }
     }

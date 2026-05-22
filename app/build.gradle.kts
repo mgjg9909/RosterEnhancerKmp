@@ -47,6 +47,12 @@ kotlin {
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
+
+            // Lifecycle ViewModel KMP (JetBrains)
+            implementation(libs.lifecycle.viewmodel.compose.kmp)
+            
+            // Navigation KMP (JetBrains)
+            implementation(libs.navigation.compose.kmp)
             
             // Room KMP
             implementation(libs.room.runtime)
@@ -62,7 +68,6 @@ kotlin {
             implementation(libs.androidx.ui.tooling.preview)
             implementation(libs.androidx.material3)
             implementation(libs.androidx.material.icons.extended)
-            implementation(libs.navigation.compose)
             
             // Room, WorkManager, ML Kit, Vico, Jsoup, etc. rimangono su AndroidMain per ora
             implementation(libs.koin.android)

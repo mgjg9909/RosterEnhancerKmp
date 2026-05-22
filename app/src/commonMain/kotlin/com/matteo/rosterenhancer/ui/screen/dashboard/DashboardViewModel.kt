@@ -131,7 +131,7 @@ class DashboardViewModel constructor(
                         it.employeeName.uppercase() != _uiState.value.selfName.uppercase()
                     }
                     
-                    if (com.matteo.rosterenhancer.BuildConfig.DEBUG)
+                    
                         println("DashboardViewModel" + ": " + "Colleghi in turno: trovati ${allWorking.size}, filtrati ${others.size} (Nome Self: '${_uiState.value.selfName}')")
                     
                     _uiState.update { it.copy(
@@ -145,7 +145,7 @@ class DashboardViewModel constructor(
     }
 
     private fun loadDashboard() {
-        if (com.matteo.rosterenhancer.BuildConfig.DEBUG) println("DashboardViewModel" + ": " + "loadDashboard() avviato")
+        println("DashboardViewModel" + ": " + "loadDashboard() avviato")
         viewModelScope.launch {
             dataStoreManager.selfMatricola.flatMapLatest { matricola ->
                 combine(
