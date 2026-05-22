@@ -6,13 +6,15 @@ import com.matteo.rosterenhancer.di.initKoin
 import com.matteo.rosterenhancer.ui.screen.main.MainScreen
 import com.matteo.rosterenhancer.ui.theme.RosterEnhancerTheme
 
-fun initKoinIOS() {
-    initKoin()
-}
+private var isKoinInitialized = false
 
 fun MainViewController() = ComposeUIViewController(
     configure = {
         enforceStrictPlistSanityCheck = false
+        if (!isKoinInitialized) {
+            initKoin()
+            isKoinInitialized = true
+        }
     }
 ) {
     RosterEnhancerTheme {
