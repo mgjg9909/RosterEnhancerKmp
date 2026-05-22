@@ -1,4 +1,4 @@
-﻿package com.matteo.rosterenhancer
+package com.matteo.rosterenhancer
 
 import androidx.compose.ui.window.ComposeUIViewController
 import androidx.navigation.compose.rememberNavController
@@ -6,9 +6,7 @@ import com.matteo.rosterenhancer.di.initKoin
 import com.matteo.rosterenhancer.ui.screen.main.MainScreen
 import com.matteo.rosterenhancer.ui.theme.RosterEnhancerTheme
 
-fun initKoinIOS() {
-    initKoin()
-}
+
 
 fun MainViewController() = ComposeUIViewController(
     configure = {
