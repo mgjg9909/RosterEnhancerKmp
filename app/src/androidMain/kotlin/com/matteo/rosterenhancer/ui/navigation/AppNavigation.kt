@@ -18,10 +18,6 @@ import com.matteo.rosterenhancer.ui.screen.settings.SettingsScreen
 import com.matteo.rosterenhancer.ui.screen.stats.StatsScreen
 import com.matteo.rosterenhancer.ui.screen.salary.SalaryScreen
 
-") {
-        fun createRoute(id: Long) = "payslip_viewer/$id"
-    }
-}
 
 // Spec condivise per le transizioni
 private val navEnterSpec = tween<IntOffset>(350, easing = FastOutSlowInEasing)
@@ -144,7 +140,6 @@ fun AppNavigation(
         }
     }
 }
-
 
 
 

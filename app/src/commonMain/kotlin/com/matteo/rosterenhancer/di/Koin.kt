@@ -1,4 +1,4 @@
-package com.matteo.rosterenhancer.di
+﻿package com.matteo.rosterenhancer.di
 
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -24,5 +24,5 @@ val commonModule = module {
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
     appDeclaration()
-    modules(commonModule, platformModule)
+    modules(commonModule, platformModule, viewModelModule)
 }

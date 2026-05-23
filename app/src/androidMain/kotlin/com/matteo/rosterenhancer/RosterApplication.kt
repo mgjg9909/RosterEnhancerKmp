@@ -1,4 +1,4 @@
-package com.matteo.rosterenhancer
+﻿package com.matteo.rosterenhancer
 
 import android.app.Application
 import android.os.Handler
@@ -11,13 +11,13 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import com.matteo.rosterenhancer.di.initKoin
-import com.matteo.rosterenhancer.di.viewModelModule
+
 import com.matteo.rosterenhancer.di.workerModule
 
 class RosterApplication : Application(), Configuration.Provider {
 
     companion object {
-        /** Riferimento al context dell'applicazione. Non causa memory leak perché è il context dell'Application stessa. */
+        /** Riferimento al context dell'applicazione. Non causa memory leak perchÃ© Ã¨ il context dell'Application stessa. */
         var appContext: Application? = null
             private set
     }
@@ -33,9 +33,9 @@ class RosterApplication : Application(), Configuration.Provider {
             androidLogger()
             androidContext(this@RosterApplication)
             workManagerFactory()
-            modules(viewModelModule, workerModule)
+            modules(workerModule)
         }
-        // ⚠️ Prima di qualsiasi altra cosa, installa il crash logger per catturare i crash futuri
+        // âš ï¸ Prima di qualsiasi altra cosa, installa il crash logger per catturare i crash futuri
         CrashLogger.install(this)
 
         // Legge l'eventuale crash precedente salvato su file dal CrashLogger
@@ -44,7 +44,7 @@ class RosterApplication : Application(), Configuration.Provider {
         if (lastCrash != null) {
             // Usa Handler sul main thread per mostrare il Toast dopo 500ms (Hilt potrebbe non essere ancora pronto)
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                // Divide il testo del crash in righe per estrarre solo la riga più significativa
+                // Divide il testo del crash in righe per estrarre solo la riga piÃ¹ significativa
                 val summary = lastCrash.lines()
                     // Cerca la prima riga che descrive l'eccezione, il messaggio o il punto del codice
                     .firstOrNull { it.startsWith("Exception") || it.startsWith("Message") || it.contains("at ") }
@@ -53,11 +53,11 @@ class RosterApplication : Application(), Configuration.Provider {
                 // Mostra un Toast (messaggio temporaneo a schermo) con un riassunto del crash
                 android.widget.Toast.makeText(
                     this,                                      // Contesto dell'applicazione
-                    "💥 CRASH PRECEDENTE:\n$summary",         // Testo del messaggio con emoji e riassunto
+                    "ðŸ’¥ CRASH PRECEDENTE:\n$summary",         // Testo del messaggio con emoji e riassunto
                     android.widget.Toast.LENGTH_LONG           // Durata lunga del Toast (~3.5 secondi)
                 ).show()
             }, 500) // Ritardo di 500 millisecondi prima di mostrare il Toast
-            // Scrive anche il crash completo nel log di Android Studio per analisi più approfondita
+            // Scrive anche il crash completo nel log di Android Studio per analisi piÃ¹ approfondita
             android.util.Log.e("CRASH_LOG", "======= ULTIMO CRASH =======\n$lastCrash")
         }
 
@@ -79,7 +79,7 @@ class RosterApplication : Application(), Configuration.Provider {
     /**
      * Watchdog thread che monitora il main thread.
      * Se il main thread non risponde entro 5 secondi, scrive lo stack trace su file.
-     * Gli ANR non triggerano UncaughtExceptionHandler, quindi questo è l'unico modo
+     * Gli ANR non triggerano UncaughtExceptionHandler, quindi questo Ã¨ l'unico modo
      * per catturarli senza root.
      */
     private fun installAnrWatchdog() {
@@ -87,17 +87,17 @@ class RosterApplication : Application(), Configuration.Provider {
         val mainHandler = Handler(Looper.getMainLooper())
         // Crea un nuovo thread in background dedicato al monitoraggio del main thread
         Thread({
-            // Il watchdog gira in loop finché non viene interrotto dall'esterno
+            // Il watchdog gira in loop finchÃ© non viene interrotto dall'esterno
             while (!Thread.currentThread().isInterrupted) {
                 try {
-                    // Flag che diventerà true solo se il main thread risponde al nostro ping
+                    // Flag che diventerÃ  true solo se il main thread risponde al nostro ping
                     var responded = false
-                    // Invia un piccolo task al main thread: se viene eseguito, il main thread è vivo
+                    // Invia un piccolo task al main thread: se viene eseguito, il main thread Ã¨ vivo
                     mainHandler.post { responded = true }
                     // Aspetta 5 secondi per dare tempo al main thread di eseguire il ping
                     Thread.sleep(5000)
 
-                    // Se dopo 5 secondi il main thread non ha risposto, è bloccato (ANR)
+                    // Se dopo 5 secondi il main thread non ha risposto, Ã¨ bloccato (ANR)
                     if (!responded) {
                         // Recupera il riferimento al main thread di Android
                         val mainThread = Looper.getMainLooper().thread
@@ -108,10 +108,10 @@ class RosterApplication : Application(), Configuration.Provider {
                         // Aggiunge l'intestazione del report ANR
                         sb.appendLine("========== ANR DETECTED ==========")
                         // Descrive il problema rilevato
-                        sb.appendLine("Il main thread è bloccato da >5 secondi!")
+                        sb.appendLine("Il main thread Ã¨ bloccato da >5 secondi!")
                         // Indica lo stato attuale del thread (BLOCKED, WAITING, ecc.)
                         sb.appendLine("Main thread state: ${mainThread.state}")
-                        // Aggiunge una riga vuota per leggibilità
+                        // Aggiunge una riga vuota per leggibilitÃ 
                         sb.appendLine()
                         // Inizia la sezione con lo stack trace del main thread
                         sb.appendLine("--- MAIN THREAD STACK TRACE ---")
@@ -121,7 +121,7 @@ class RosterApplication : Application(), Configuration.Provider {
                         }
                         // Aggiunge una riga vuota per separare le sezioni
                         sb.appendLine()
-                        // Inizia la sezione con tutti i thread attivi nell'app per avere più contesto
+                        // Inizia la sezione con tutti i thread attivi nell'app per avere piÃ¹ contesto
                         sb.appendLine("--- ALL THREADS ---")
                         // Itera tutti i thread attivi e i loro stack trace
                         for ((t, stack) in Thread.getAllStackTraces()) {
@@ -138,7 +138,7 @@ class RosterApplication : Application(), Configuration.Provider {
                         // Scrive il report nel log di Android Studio con livello ERROR
                         android.util.Log.e("ANR_WATCHDOG", report)
 
-                        // Salva il report su file così è leggibile al prossimo avvio dell'app
+                        // Salva il report su file cosÃ¬ Ã¨ leggibile al prossimo avvio dell'app
                         try {
                             // Crea (o accede) alla cartella "crashes" nella memoria interna dell'app
                             val dir = java.io.File(filesDir, "crashes")
@@ -161,7 +161,7 @@ class RosterApplication : Application(), Configuration.Provider {
         }, "ANR-Watchdog").apply {
             // Imposta il thread come "daemon": non blocca la chiusura dell'app quando tutte le Activity terminano
             isDaemon = true
-            // Assegna la priorità minima: il watchdog non deve competere con il lavoro principale
+            // Assegna la prioritÃ  minima: il watchdog non deve competere con il lavoro principale
             priority = Thread.MIN_PRIORITY
             // Avvia il thread watchdog
             start()
@@ -187,7 +187,7 @@ class RosterApplication : Application(), Configuration.Provider {
         // Aggiunge il task alla coda di WorkManager in modo che sia unico (non duplicato)
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "CloudSyncWork",                      // Nome univoco del task: evita duplicati
-            ExistingPeriodicWorkPolicy.KEEP,       // Se esiste già un task con questo nome, lo mantiene senza rimpiazzarlo
+            ExistingPeriodicWorkPolicy.KEEP,       // Se esiste giÃ  un task con questo nome, lo mantiene senza rimpiazzarlo
             syncRequest                            // La richiesta di lavoro periodico da schedulare
         )
     }

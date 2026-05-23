@@ -1,4 +1,4 @@
-package com.matteo.rosterenhancer.di
+﻿package com.matteo.rosterenhancer.di
 
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -39,6 +39,21 @@ actual val platformModule: Module = module {
     }
     
     // Stubs for missing iOS implementations required by RosterRepository
+        single<com.matteo.rosterenhancer.domain.parser.XlsxParser> {
+        object : com.matteo.rosterenhancer.domain.parser.XlsxParser {
+            override suspend fun parse(fileBytes: ByteArray): com.matteo.rosterenhancer.domain.parser.ParseResult = com.matteo.rosterenhancer.domain.parser.ParseResult(emptyList(), emptyList(), 1, 2024, "", "Not implemented on iOS")
+            override fun parseShiftCell(rawCode: String, employeeId: String, employeeName: String, date: kotlinx.datetime.LocalDate, monthRosterId: Long): com.matteo.rosterenhancer.domain.model.Shift = throw Exception("Not implemented on iOS")
+        }
+    }
+    
+    single<com.matteo.rosterenhancer.domain.payslip.PayslipProcessor> {
+        object : com.matteo.rosterenhancer.domain.payslip.PayslipProcessor {
+            override suspend fun processNewPayslip(fileBytes: ByteArray, fileName: String, isPdf: Boolean): com.matteo.rosterenhancer.domain.payslip.CalibrationResult = throw Exception("Not implemented")
+            override suspend fun applyCalibration(delta: Double, month: Int, year: Int) {}
+            override fun deleteFile(filePath: String) {}
+        }
+    }
+
     single<IRosterScraper> {
         object : IRosterScraper {
             override suspend fun login(user: String, pass: String): Result<String> = Result.failure(Exception("Not implemented on iOS yet"))
