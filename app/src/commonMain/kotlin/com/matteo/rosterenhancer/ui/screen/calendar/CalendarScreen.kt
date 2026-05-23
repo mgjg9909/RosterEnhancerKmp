@@ -62,7 +62,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.draw.rotate
@@ -982,7 +982,7 @@ private fun MonthGrid(
 ) {
     val daysOfWeek  = listOf("L", "M", "M", "G", "V", "S", "D")
     val firstDay    = yearMonth.atDay(1)
-    val startOffset = (firstDay.dayOfWeek.value - 1) % 7
+    val startOffset = (firstDay.dayOfWeek.ordinal + 1 - 1) % 7
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
 
     GlassCard(
@@ -1322,13 +1322,11 @@ private fun CalendarDateView(
     onEditClick: (Shift) -> Unit
 ) {
     var offsetX by remember { mutableStateOf(0f) }
-    val context = LocalContext.current
-
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex }
             .collect {
                 if (listState.isScrollInProgress) {
-                    HapticFeedbackManager.playLightHaptic(haptic, context)
+                    HapticFeedbackManager.playLightHaptic(haptic)
                 }
             }
     }
@@ -1468,13 +1466,12 @@ private fun ColleaguesPeopleView(
 
         val listState = rememberLazyListState()
         val haptic = LocalHapticFeedback.current
-        val context = LocalContext.current
 
         LaunchedEffect(listState) {
             snapshotFlow { listState.firstVisibleItemIndex }
                 .collect {
                     if (listState.isScrollInProgress) {
-                        HapticFeedbackManager.playLightHaptic(haptic, context)
+                        HapticFeedbackManager.playLightHaptic(haptic)
                     }
                 }
         }

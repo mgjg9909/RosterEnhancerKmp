@@ -41,6 +41,9 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.matteo.rosterenhancer.util.italianDisplayName
 import com.matteo.rosterenhancer.ui.theme.SuccessGreen
 import com.matteo.rosterenhancer.util.YearMonth
+import com.matteo.rosterenhancer.util.formatDecimal
+import com.matteo.rosterenhancer.util.formatCurrency
+import com.matteo.rosterenhancer.util.formatCurrencyInt
 import com.matteo.rosterenhancer.util.TextStyle
 import com.matteo.rosterenhancer.util.Locale
 import com.matteo.rosterenhancer.domain.model.DailySummary
@@ -86,8 +89,8 @@ fun SalaryScreen(
     var filteredDailySummaries by remember { mutableStateOf<List<com.matteo.rosterenhancer.domain.model.DailySummary>>(emptyList()) }
     var breakdownType by remember { mutableStateOf("overtime") } // "overtime" o "night"
 
-    fun formatMoney(value: Double): String = if (privacyMode) "€ ***,**" else "€ ${"%,.2f".format(value)}"
-    fun formatMoneyInt(value: Double): String = if (privacyMode) "€ ***" else "€ ${"%,.0f".format(value)}"
+    fun formatMoney(value: Double): String = if (privacyMode) "€ ***,**" else "€ ${value.formatCurrency()}"
+    fun formatMoneyInt(value: Double): String = if (privacyMode) "€ ***" else "€ ${value.formatCurrencyInt()}"
 
     Scaffold(
         topBar = {
@@ -244,7 +247,7 @@ fun SalaryScreen(
                                     modifier = Modifier.weight(1f).fillMaxHeight(),
                                     title = "Netto Attuale",
                                     value = formatMoneyInt(uiState.projection?.earnedSoFar ?: summary.estimatedNetPay),
-                                    subValue = "Tassazione: ${"%.0f".format(uiState.profile.taxRate * 100)}%",
+                                    subValue = "Tassazione: ${(uiState.profile.taxRate * 100).formatDecimal(0)}%",
                                     icon = Icons.Outlined.AccountBalanceWallet,
                                     color = SuccessGreen
                                 )
@@ -1230,7 +1233,7 @@ private fun EarningsHeroCard(summary: MonthlySummary, formatMoney: (Double) -> S
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    HeroStatItem(label = "Ore Totali", value = "${"%.1f".format(summary.totalHours)}h", icon = Icons.Outlined.Timer)
+                    HeroStatItem(label = "Ore Totali", value = "${summary.totalHours.formatDecimal(1)}h", icon = Icons.Outlined.Timer)
                     HeroStatItem(label = "Lordo Totale", value = formatMoneyInt(summary.totalGrossPay), icon = Icons.Outlined.Payments)
                 }
             }
@@ -1485,7 +1488,7 @@ private fun ShiftEarningItem(
                             shape = RoundedCornerShape(4.dp)
                         ) {
                             Text(
-                                "+${"%.1f".format(daily.manualOvertimeHours)}h str.",
+                                "+${daily.manualOvertimeHours.formatDecimal(1)}h str.",
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold,
@@ -1597,12 +1600,12 @@ private fun ShiftDetailsDialog(
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("Ore Ordinarie")
-                Text("${"%.1f".format(daily.totalHours - daily.manualOvertimeHours)}h", fontWeight = FontWeight.Bold, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
+                Text("${(daily.totalHours - daily.manualOvertimeHours).formatDecimal(1)}h", fontWeight = FontWeight.Bold, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
             }
             if (daily.manualOvertimeHours > 0) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("Straordinari")
-                    Text("+${"%.1f".format(daily.manualOvertimeHours)}h", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
+                    Text("+${daily.manualOvertimeHours.formatDecimal(1)}h", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                 }
             }
         
@@ -1613,30 +1616,30 @@ private fun ShiftDetailsDialog(
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 val ordinaryHours = daily.totalHours - daily.manualOvertimeHours
-                Text("Paga Base (${"%.1f".format(ordinaryHours)}h)")
+                Text("Paga Base (${ordinaryHours.formatDecimal(1)}h)")
                 Text(formatMoney(daily.basePay), fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
             }
             if (daily.manualOvertimePay > 0) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Straordinari (${"%.1f".format(daily.manualOvertimeHours)}h)")
+                    Text("Straordinari (${daily.manualOvertimeHours.formatDecimal(1)}h)")
                     Text(formatMoney(daily.manualOvertimePay), fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                 }
             }
             if (daily.nightBonusPay > 0) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Notturno (${"%.1f".format(daily.nightHours)}h)")
+                    Text("Notturno (${daily.nightHours.formatDecimal(1)}h)")
                     Text(formatMoney(daily.nightBonusPay), fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                 }
             }
             if (daily.sundayBonusPay > 0) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Domenicale (${"%.1f".format(daily.sundayHours)}h)")
+                    Text("Domenicale (${daily.sundayHours.formatDecimal(1)}h)")
                     Text(formatMoney(daily.sundayBonusPay), fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                 }
             }
             if (daily.holidayBonusPay > 0) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Festivo (${"%.1f".format(daily.holidayHours)}h)")
+                    Text("Festivo (${daily.holidayHours.formatDecimal(1)}h)")
                     Text(formatMoney(daily.holidayBonusPay), fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                 }
             }

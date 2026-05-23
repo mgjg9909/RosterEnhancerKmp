@@ -124,7 +124,7 @@ fun CollapsibleCalendarHeader(
                 if (expanded) {
                     // Vista Mensile
                     val firstDay = currentMonth.atDay(1)
-                    val startOffset = (firstDay.dayOfWeek.value - 1) % 7
+                    val startOffset = (firstDay.dayOfWeek.ordinal + 1 - 1) % 7
                     val rows = ((startOffset + currentMonth.lengthOfMonth) + 6) / 7
                     
                     Column {
@@ -160,7 +160,7 @@ fun CollapsibleCalendarHeader(
                         currentMonth.atDay(1)
                     }
                     
-                    val startOfWeek = dateToShow.minusDays((dateToShow.dayOfWeek.value - 1).toLong())
+                    val startOfWeek = dateToShow.minusDays((dateToShow.dayOfWeek.ordinal + 1 - 1).toLong())
                     
                     Row(modifier = Modifier.fillMaxWidth()) {
                         for (i in 0 until 7) {
