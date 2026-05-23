@@ -1,4 +1,4 @@
-﻿package com.matteo.rosterenhancer.di
+package com.matteo.rosterenhancer.di
 
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -19,19 +19,15 @@ import com.matteo.rosterenhancer.domain.model.Shift
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
+import platform.Foundation.NSHomeDirectory
+
 @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
 actual val platformModule: Module = module {
     single {
-        val documentDirectory = NSFileManager.defaultManager.URLForDirectory(
-            directory = NSDocumentDirectory,
-            inDomain = NSUserDomainMask,
-            appropriateForURL = null,
-            create = false,
-            error = null,
-        )
-        val dbFilePath = requireNotNull(documentDirectory?.path) + "/roster_database.db"
+        val dbFilePath = NSHomeDirectory() + "/Documents/roster_database.db"
         Room.databaseBuilder<RosterDatabase>(
-            name = dbFilePath
+            name = dbFilePath,
+            factory = { com.matteo.rosterenhancer.data.local.RosterDatabaseConstructor.initialize() }
         )
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
