@@ -19,6 +19,7 @@ import com.matteo.rosterenhancer.domain.model.Shift
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
+@OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
 actual val platformModule: Module = module {
     single {
         val documentDirectory = NSFileManager.defaultManager.URLForDirectory(
