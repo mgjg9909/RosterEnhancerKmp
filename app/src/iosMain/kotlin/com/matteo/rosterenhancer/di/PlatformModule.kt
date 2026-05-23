@@ -6,7 +6,9 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.room.Room
 import com.matteo.rosterenhancer.data.local.RosterDatabase
 import com.matteo.rosterenhancer.util.createDataStore
-import platform.Foundation.NSHomeDirectory
+import platform.Foundation.NSDocumentDirectory
+import platform.Foundation.NSUserDomainMask
+import platform.Foundation.NSFileManager
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.plugins.cookies.HttpCookies
@@ -14,14 +16,24 @@ import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import com.matteo.rosterenhancer.data.network.IRosterScraper
 import com.matteo.rosterenhancer.data.security.CredentialsManager
 import com.matteo.rosterenhancer.domain.model.Shift
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 
 actual val platformModule: Module = module {
     single {
-        val dbFilePath = NSHomeDirectory() + "/roster_database.db"
+        val documentDirectory = NSFileManager.defaultManager.URLForDirectory(
+            directory = NSDocumentDirectory,
+            inDomain = NSUserDomainMask,
+            appropriateForURL = null,
+            create = false,
+            error = null,
+        )
+        val dbFilePath = requireNotNull(documentDirectory?.path) + "/roster_database.db"
         Room.databaseBuilder<RosterDatabase>(
             name = dbFilePath
         )
         .setDriver(BundledSQLiteDriver())
+        .setQueryCoroutineContext(Dispatchers.IO)
         .fallbackToDestructiveMigration(true)
         .build()
     }
@@ -39,7 +51,7 @@ actual val platformModule: Module = module {
     }
     
     // Stubs for missing iOS implementations required by RosterRepository
-        single<com.matteo.rosterenhancer.domain.parser.XlsxParser> {
+    single<com.matteo.rosterenhancer.domain.parser.XlsxParser> {
         object : com.matteo.rosterenhancer.domain.parser.XlsxParser {
             override suspend fun parse(fileBytes: ByteArray): com.matteo.rosterenhancer.domain.parser.ParseResult = com.matteo.rosterenhancer.domain.parser.ParseResult(emptyList(), emptyList(), 1, 2024, "", "Not implemented on iOS")
             override fun parseShiftCell(rawCode: String, employeeId: String, employeeName: String, date: kotlinx.datetime.LocalDate, monthRosterId: Long): com.matteo.rosterenhancer.domain.model.Shift = throw Exception("Not implemented on iOS")
