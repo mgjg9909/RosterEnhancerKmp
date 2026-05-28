@@ -4,7 +4,6 @@ import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import org.koin.core.module.dsl.singleOf
-import org.koin.core.module.dsl.factoryOf
 import com.matteo.rosterenhancer.data.local.RosterDatabase
 import com.matteo.rosterenhancer.data.repository.RosterRepository
 import com.matteo.rosterenhancer.util.DataStoreManager
@@ -26,9 +25,9 @@ val commonModule = module {
     singleOf(::RosterRepository)
     
     // UseCases
-    factoryOf(::FindSwapCandidatesUseCase)
-    factoryOf(::FindRestSwapCandidatesUseCase)
-    factoryOf(::GetMonthlyStatsUseCase)
+    factory { FindSwapCandidatesUseCase(get()) }
+    factory { FindRestSwapCandidatesUseCase(get()) }
+    factory { GetMonthlyStatsUseCase(get()) }
 }
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
