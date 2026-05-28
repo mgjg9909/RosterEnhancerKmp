@@ -1,4 +1,4 @@
-﻿package com.matteo.rosterenhancer.di
+package com.matteo.rosterenhancer.di
 
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -20,6 +20,11 @@ val commonModule = module {
     
     singleOf(::DataStoreManager)
     singleOf(::RosterRepository)
+    
+    // UseCases
+    org.koin.core.module.dsl.factoryOf(com.matteo.rosterenhancer.domain.usecase.FindSwapCandidatesUseCase::class)
+    org.koin.core.module.dsl.factoryOf(com.matteo.rosterenhancer.domain.usecase.FindRestSwapCandidatesUseCase::class)
+    org.koin.core.module.dsl.factoryOf(com.matteo.rosterenhancer.domain.usecase.GetMonthlyStatsUseCase::class)
 }
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
