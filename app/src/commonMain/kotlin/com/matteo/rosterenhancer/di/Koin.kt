@@ -4,9 +4,13 @@ import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.factoryOf
 import com.matteo.rosterenhancer.data.local.RosterDatabase
 import com.matteo.rosterenhancer.data.repository.RosterRepository
 import com.matteo.rosterenhancer.util.DataStoreManager
+import com.matteo.rosterenhancer.domain.usecase.FindSwapCandidatesUseCase
+import com.matteo.rosterenhancer.domain.usecase.FindRestSwapCandidatesUseCase
+import com.matteo.rosterenhancer.domain.usecase.GetMonthlyStatsUseCase
 import org.koin.dsl.KoinAppDeclaration
 
 expect val platformModule: Module
@@ -22,9 +26,9 @@ val commonModule = module {
     singleOf(::RosterRepository)
     
     // UseCases
-    org.koin.core.module.dsl.factoryOf(com.matteo.rosterenhancer.domain.usecase.FindSwapCandidatesUseCase::class)
-    org.koin.core.module.dsl.factoryOf(com.matteo.rosterenhancer.domain.usecase.FindRestSwapCandidatesUseCase::class)
-    org.koin.core.module.dsl.factoryOf(com.matteo.rosterenhancer.domain.usecase.GetMonthlyStatsUseCase::class)
+    factoryOf(::FindSwapCandidatesUseCase)
+    factoryOf(::FindRestSwapCandidatesUseCase)
+    factoryOf(::GetMonthlyStatsUseCase)
 }
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
