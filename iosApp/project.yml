@@ -22,6 +22,7 @@ targets:
         # Sideloading: firma con il certificato personale free
         CODE_SIGN_IDENTITY: "iPhone Developer"
         DEVELOPMENT_TEAM: ""
+        UILaunchStoryboardName: LaunchScreen
         # Il framework KMP viene generato da Gradle e copiato qui
         FRAMEWORK_SEARCH_PATHS:
           - "$(inherited)"
